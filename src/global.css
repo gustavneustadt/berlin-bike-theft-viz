@@ -1,0 +1,27 @@
+html {
+	background: color(display-p3 1 0.935 0.935);
+	
+	/* --accentPrimary: color(display-p3 0.839 0.068 0); */
+	--colorAccentPrimary: color(display-p3 1 0.854 0);
+	/* --accentDark: color(display-p3 0 0 0); */
+	
+	/* --accentPrimaryRGB: rgb(255, 0, 0); */
+	--colorAccentPrimaryRGB: rgb(255, 234, 0);
+	/* --accentDark: rgb(0, 0, 0); */
+	
+	background: rgb(82, 82, 82);
+	
+	--colorTextPrimary: rgb(229, 231, 235);
+	--colorTextMuted: rgb(175, 179, 187);
+	--colorTextMutedDark: rgb(99, 96, 96);
+	--colorTextDark: rgb(0, 0, 0);
+	--colorTextDarkMuted: rgb(43, 43, 43);
+}
+
+svg text, html {
+	font-family: "TheSans";
+	/* color: var(--accentDarkRGB);
+	color: var(--accentDark); */
+	color: var(--colorTextPrimary);
+	font-weight: 300;
+}
