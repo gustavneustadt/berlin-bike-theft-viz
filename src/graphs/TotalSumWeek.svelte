@@ -6,7 +6,7 @@
 	
 	export let data: TheftRecord[]
 	
-	const tweenedValues: Tweened<[number, number]> = tweened([0, 0], {
+	$: tweenedValues = tweened(filteredGroup[1].map((d: number) => d / 1.5), {
 		duration: 1000,
 		easing: cubicOut
 	})

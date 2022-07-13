@@ -4,13 +4,12 @@
 	import { cubicOut } from "svelte/easing"
 	import NumberStatement from './NumberStatement.svelte'
 	export let data: TheftRecord[]
-	export let width: number
 	
-	const tweenedValues: Tweened<[number, number]> = tweened([0, 0], {
+	$: tweenedValues = tweened(highestMonth[1].map((d: number) => d/1.5), {
 		duration: 1000,
 		easing: cubicOut
 	})
-	
+
 	$: rollup = d3.rollups(
 		data,
 		// (g: TheftRecord[]) => d3.sum(g, (d: TheftRecord) => d.damageAmount),

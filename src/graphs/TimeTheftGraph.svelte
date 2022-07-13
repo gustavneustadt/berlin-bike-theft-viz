@@ -2,12 +2,13 @@
 	import * as d3 from "d3"
 	import { Tweened ,tweened } from "svelte/motion";
 	import { cubicOut } from "svelte/easing";
+	import SvgRect from '../helper/SvgRect.svelte'
 	
 	export let data: TheftRecord[]
 	
 	let svg: SVGElement
 	
-	let tweenedBinHeight: Tweened<number> = tweened(0, {
+	let tweenedBinHeight: Tweened<number> = tweened(0.9, {
 		duration: 1000,
 		easing: cubicOut
 	})
@@ -62,8 +63,6 @@
 		stackArray(g[1].sort().reverse(), d => d[1])
 	])
 	
-	$: console.log(stacked, xBound)
-	
 	const stackArray = (list: any[], callback: (element: any) => number) => {
 		const remapped: number[] = list.map(d => callback(d))
 		
@@ -98,11 +97,9 @@
 		context.select("g.axis .vertical").append("g").call(axisVertical)
 	}
 	
-	$: barMargin = 5
+	$: barMargin = 6
 	
 	$: barWidth = width / stacked.length - barMargin - 1
-	
-	$: console.log(width, barWidth, stacked.length)
 	
 </script>
 
@@ -117,28 +114,34 @@
 <svg bind:this={svg} viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet">
 	<g transform="translate({margin.left}, {margin.top})">
 		<g class="bars">
-			{#each stacked as stack}
+			{#each stacked as stack, j}
 				<g
 					transform="translate(0 {height * (1-$tweenedBinHeight)})"
 				>
+					<clipPath id="bin-{j}" transform="translate(0, {y(stack[1].at(-1)[1][1])})" opacity="0.1">
+						<SvgRect
+							r={[3, 3, 1, 1]}
+							height={height - y(stack[1].at(-1)[1][1])}
+							width={barWidth}
+						/>
+					</clipPath>
 					<g
 						transform="translate({x(stack[0])} {0}) scale(1 {$tweenedBinHeight})"
+						clip-path="url(#bin-{j})"
 					>
 					{#each stack[1] as bin}
 						<g
 							transform="translate(0 {y(bin[1][0]) - (height - y(bin[0][1]))})"
-						>
-							<rect 
+						>	
+							<rect
 								class="bin-background"
-								width={barWidth}
-								x={1}
 								height={height - y(bin[0][1])}
+								width={barWidth}
 							/>
-							<rect 
+							<rect
 								class="bin"
-								width={barWidth}
-								x={1}
 								height={height - y(bin[0][1])}
+								width={barWidth}
 								opacity={bin[0][0]}
 							/>
 						</g>

@@ -24,7 +24,6 @@
 <style>
 	b-small-title {
 		font-size: 1.2rem;
-		color: var(--colorAccentPrimaryRGB);
 		color: var(--colorAccentPrimary);
 		font-weight: 500;
 		position: relative;
@@ -39,7 +38,7 @@
 		border: .4rem solid;
 		border-color: var(--colorTextDark);
 		color: var(--colorTextDark);
-		background: var(--colorTextPrimary);
+		background: var(--colorAccentPrimaryMuted);
 		border-radius: 1rem;
 		padding: .5rem 1rem;
 		text-align: right;
@@ -64,13 +63,13 @@
 		/* font-variant-numeric: tabular-nums; */
 		/* text-transform: uppercase; */
 		/* letter-spacing: .2rem; */
-		color: var(--colorTextMuted);
+		color: var(--colorAccentPrimaryMuted);
 	}
 	b-wrapper {
 		display: flex;
 		align-items: flex-end;
 		flex-direction: column;
-		gap: .9rem;
+		gap: 1.8rem;
 	}
 	b-wrapper:not(:first-of-type) {
 		margin: .8rem 0 0;

@@ -5,7 +5,7 @@
 	import NumberStatement from './NumberStatement.svelte'
 	export let data: TheftRecord[]
 	
-	let tweenedValues: Tweened<[number, number]> = tweened([0, 0], {
+	$: tweenedValues = tweened(rollup.map((d: number) => d / 1.5), {
 		duration: 1000,
 		easing: cubicOut
 	})

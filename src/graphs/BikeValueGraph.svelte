@@ -2,11 +2,16 @@
 	import * as d3 from "d3"
 	import { Tweened, tweened } from "svelte/motion"
 	import { cubicOut } from "svelte/easing"
+	import * as d3annotation from "d3-svg-annotation"
+	import SvgRect from '../helper/SvgRect.svelte'
+	import Annotation from '../helper/Annotation.svelte'
+	
 	export let data: TheftRecord[]
+	
 	
 	let svg: SVGElement
 	
-	let tweenedBinHeight: Tweened<number> = tweened(0, {
+	let tweenedBinHeight: Tweened<number> = tweened(0.9, {
 		duration: 1000,
 		easing: cubicOut
 	})
@@ -17,7 +22,7 @@
 		top: 20,
 		left: 10,
 		right: 20,
-		bottom: 20,
+		bottom: 100,
 		get verticalMargin() {  
 			return this.top + this.bottom 
 		},
@@ -26,8 +31,11 @@
 		}
 	}
 	
-	const width: number = 450 - margin.horizontalMargin
-	const height: number = 250 - margin.verticalMargin
+	const size: [number, number] = [450, 350]
+	
+	const width: number = size[0] - margin.horizontalMargin
+	const height: number = size[1] - margin.verticalMargin
+	
 	
 	$: context = d3.select(svg)
 		.select("g")
@@ -48,9 +56,9 @@
 	]
 	
 	$: y = d3.scaleSqrt()
+		.exponent(.6)
 		.domain(yBound)
 		.range([height, 0])
-	
 	
 	const isOdd = (number: number) => number % 4 != 2
 	
@@ -63,7 +71,7 @@
 		}
 	}
 	
-	$: binNumber = width / getEvenDivisor(width, 4)
+	$: binNumber = width / getEvenDivisor(width, 10)
 	
 	$: thresholdsArray = [...Array(binNumber)].map(
 		(_, i: number) => (axisHorizontal.scale().domain()[1] / binNumber) * i
@@ -74,79 +82,147 @@
 		.domain(x.domain())
 		.thresholds(thresholdsArray)(data)
 	
-	const verticalNumberFormatter = new Intl.NumberFormat("fr", {
+	$: median = d3.median(data, (d: TheftRecord) => d.damageAmount) 
+	
+	const verticalNumberFormatter = new Intl.NumberFormat("en", {
 		useGrouping: true
 	})
 	
-	const horizontalNumberFormatter = new Intl.NumberFormat("fr", {
+	const horizontalNumberFormatter = new Intl.NumberFormat("en", {
 		style: "currency",
 		currency: "EUR",
 		maximumFractionDigits: 0,
 	})
-
-	const getSpacedSqrtTicks = ([first, second]: [number, number], number: number): number[] => {
-		let space = Math.sqrt(second) - Math.sqrt(first)
-		const ticks: number[] = []
-		for(let i = 0; i < number; i++) {
-			ticks.push(
-				Math.pow(space, 2) * i
-			)
-		}
-		return ticks
-	}
-	
-	$: console.log(getSpacedSqrtTicks([100, 500], 10))
 	
 	$: opacityScale = d3.scaleSqrt()
-	.domain(yBound)
-	.range([0, 1])
-	$: axisVertical = d3.axisLeft(y).tickFormat((d: number) => verticalNumberFormatter.format(d)).tickValues([10, 150, 500, 1000, 2000, 4000]).tickSize(width).tickPadding(-width)
+		.domain(yBound)
+		.range([0, 1])
+	$: axisVertical = d3.axisLeft(y).tickFormat((d: number) => verticalNumberFormatter.format(d)).ticks(4).tickSize(width).tickPadding(-width)
 	$: axisHorizontal = d3.axisBottom(x).tickFormat((d: number) => horizontalNumberFormatter.format(d)).ticks(5)
 	
-	// $: [10, 20, 30, 40, 50].forEach(i => console.log(i, Math.sqrt(i), Math.sqrt(i) * Math.sqrt(i)))
-	
-	
 	$: if(svg) {
-		context.select("g.axis").append("g").attr("transform", `translate(0, ${height})`).call(axisHorizontal)
-		context.select("g.axis").append("g").attr("transform", `translate(${width}, 0)`).call(axisVertical)
+		context.select("g.axis .horizontal").attr("transform", `translate(0, ${height})`).call(axisHorizontal)
+		context.select("g.axis .vertical").attr("transform", `translate(${width}, 0)`).call(axisVertical)
 			.selectAll(".tick text")
 			.attr("transform", "translate(0, -10)")
 	}
 	
+	
+	let mouseEntered = false
+	
+	$: if(svg) {
+		svg.addEventListener("mouseenter", (e: MouseEvent) => {
+			mouseEntered = true
+		})
+		svg.addEventListener("mouseleave", (e: MouseEvent) => {
+			mouseEntered = false
+		})
+		svg.addEventListener("mousemove", (e: MouseEvent) => {
+			mouseOffset = [
+				(e.offsetX / svgBoundingRect.width) * size[0] - margin.left,
+				(e.offsetY / svgBoundingRect.height) * size[1]
+			]
+		})
+	}
+	let mouseOffset: [number, number] = [0, 0]
+	$: mousePosition = [
+		x.clamp(true).invert(mouseOffset[0]),
+		y.invert(mouseOffset[1])
+	]
+	$: mousePositionedBin = bins.findIndex(bin => bin.x0 <= mousePosition[0] && bin.x1 >= mousePosition[0] && bin.length > 0)
+	
+	let mousePositionBinMiddle: number = 0
+	let hoverTextBound: string = ""
+	let hoverTextNumber: string = ""
+	
+	$: if(mousePositionedBin >= 0){
+		mousePositionBinMiddle = bins[mousePositionedBin].x0 + (bins[mousePositionedBin].x1 - bins[mousePositionedBin].x0) / 2
+		hoverTextBound = `${horizontalNumberFormatter.format(bins[mousePositionedBin].x0)} – ${horizontalNumberFormatter.format(bins[mousePositionedBin].x1)}`
+		hoverTextNumber = verticalNumberFormatter.format(bins[mousePositionedBin].length)
+	}
+	
+	$: svgBoundingRect = svg ? svg.getBoundingClientRect() : null
+	
+	$: colorScale = d3.scaleLinear()
+		.domain([0, 1])
+		.range([])
 </script>
 
 <style>
 
 </style>
-
-
-<svg bind:this={svg} viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet">
-	<g transform="translate({margin.left}, {margin.top})">
-		<g class="axis"></g>
+<svg bind:this={svg} viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet" pointer-events="all">
+	<g class="wrapper" transform="translate({margin.left}, {margin.top})" pointer-events="none">
+		<g class="axis">
+			<g class="vertical"></g>
+			<g class="horizontal" opacity={mouseEntered ? .3 : 1 }></g>
+		</g>
 		<g class="bars">
-			{#each bins as bin}
+			{#each bins as bin, i}
 			<g transform="translate({x(bin.x0)} {y(bin.length) + (height - y(bin.length)) * (1-$tweenedBinHeight)})">
-				<g transform="scale(1 {$tweenedBinHeight})">
-					<rect 
-						rx="2"
-						ry="2"
+				<g transform="scale(1 {$tweenedBinHeight})" opacity={mouseEntered ? i === mousePositionedBin ? 1 : .3 : 1 }>
+					<clipPath id="bin-{i}">
+						<SvgRect
+							class="bin-background"
+							r={[3, 3, 1, 1]}
+							height={height - y(bin.length)} 
+							width={x(bin.x1 - bin.x0) - 1}
+						/>
+					</clipPath>
+					<rect
 						class="bin-background"
-						x={1}
 						height={height - y(bin.length)} 
 						width={x(bin.x1 - bin.x0) - 1}
+						clip-path="url(#bin-{i})"
 					/>
-					<rect 
-						rx="2"
-						ry="2"
+					<rect
 						class="bin"
-						x={1}
 						height={height - y(bin.length)} 
 						width={x(bin.x1 - bin.x0) - 1}
+						clip-path="url(#bin-{i})"
 						opacity={opacityScale(bin.length)}
 					/>
 				</g>
 			</g>
 			{/each}
+		</g>
+		<g class="annotations">
+			{#if mouseEntered}
+				<Annotation 
+					note={
+						{
+							title: hoverTextBound,
+							label: hoverTextNumber + " Theft" + (Number(hoverTextNumber) > 1 ? "s" : ""),
+							align: (x(mousePositionBinMiddle) / width > 0.8 ? "right" : "left"),
+							lineType: "horizontal",
+							padding: 10
+						}
+					}
+					type={d3annotation.annotationLabel}
+					x={x(mousePositionBinMiddle)}
+					y={height}
+					dy={40}
+					dx={0}
+					highlight
+				/>
+			{:else}
+				<Annotation 
+					note={
+						{
+							title: "Median Damage",
+							label: horizontalNumberFormatter.format(median),
+							align: "dynamic",
+							lineType: "horizontal",
+							padding: 10
+						}
+					}
+					type={d3annotation.annotationLabel}
+					x={x(median)}
+					y={height}
+					dy={40}
+					dx={0}
+				/>
+			{/if}
 		</g>
 	</g>
 </svg>

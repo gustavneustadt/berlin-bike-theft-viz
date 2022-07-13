@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount, setContext } from "svelte"
 import * as d3 from "d3"
+import Color from "colorjs.io"
 import { readable, Readable } from "svelte/store"
 
 import Scrollama from "scrollama"
@@ -11,14 +12,36 @@ const scroller = Scrollama()
 let currentScrollIndex: number
 let currentTextId: number
 let isScrollDirectionUp: boolean
-let graphsElements: HTMLDivElement[]
+let textElements: HTMLDivElement[]
+
+let mainElement: HTMLElement
+let computedStyles: Map<string, Color>
 
 let data: TheftRecord[]
 
-$: {
-	setContext("theftData", data)
+$: setContext("theftData", data)
+$: setContext("styles", computedStyles)
+
+$: if(mainElement) { 
+	computedStyles = new Map()
+	const styles = [
+		"--colorAccentPrimary",
+		"--colorAccentSecondary",
+		"--colorAccentPrimaryMuted",
+		"--colorAccentSecondaryMuted"
+	]
+	const computed = getComputedStyle(mainElement)
+	
+	styles.forEach((d: string) => {
+		
+		const property = computed.getPropertyValue(d)
+		const color = Color.parse(property)
+		
+		computedStyles.set(d, color)
+	})
 }
 
+$: console.log(computedStyles)
 const url = 'https://corsproxy.io/?' + encodeURIComponent('https://www.internetwache-polizei-berlin.de/vdb/Fahrraddiebstahl.csv');
 
 onMount(async () => {
@@ -53,15 +76,19 @@ onMount(async () => {
   
   scroller
 	.setup({
-		step: graphsElements,
+		step: textElements,
+		progress: true
 	})
 	.onStepEnter(response => {
-		
-		
+		// console.log(response)
 		isScrollDirectionUp = response.direction == "up"
 		currentScrollIndex = response.index
 		currentTextId = Number(response.element.dataset.textId)
 	})
+	.onStepProgress(response => {
+		progress = response.progress
+	})
+	.resize()
 })
 
 function getDateFrom(date: string, hour: string): Date {
@@ -70,6 +97,8 @@ function getDateFrom(date: string, hour: string): Date {
 	let parsedDate = new Date(Date.parse(`${dateGroups.year}-${dateGroups.month}-${dateGroups.day}T${hour}:00:00`))
 	return parsedDate
 }
+
+let progress: number = 0
 
 
 </script>
@@ -94,19 +123,76 @@ main > * {
 }
 
 h1 {
+	font-size: 8rem;
 	display: flex;
 	flex-direction: column;
-	line-height: 1.1;
+	line-height: .9;
+	letter-spacing: -.2rem;
+	color: var(--colorAccentPrimaryMuted);
+	text-align: center;
+	margin: 0;
 }
 
 h1 > span:first-child {
 	font-weight: 500;
+	font-size: 6rem;
 }
 
+h2 {
+	font-weight: 300;
+	color: var(--colorTextPrimary);
+	margin: none;
+	/* font-variant-caps: all-small-caps; */
+	/* letter-spacing: .1rem; */
+}
 header {
-	max-width: 50vw;
-	margin: 0 auto;
-	padding: 0 1rem;
+	height: 100vh;
+	width: 100%;
+	left: 0;
+	top: 0;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	z-index: 100;
+}
+
+header > .video-wrapper {
+	position: absolute;
+	z-index: -1;
+	height: 100%;
+	width: 100%;
+	padding: 1rem;
+	box-sizing: border-box;
+}
+.video-wrapper video {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	mix-blend-mode: hard-light;
+	/* opacity: .8; */
+	margin: none;
+}
+.video-wrapper .background {
+	background: var(--colorAccentPrimary);
+	position: absolute;
+	top: 0;
+	left: 0;
+	/* bottom: 0; */
+	/* right: 0; */
+	height: 100%;
+	width: 100%;
+	z-index: -1;
+}
+
+author {
+	position: absolute;
+	bottom: 2rem;
+	color: var(--colorTextMuted);
+	font-size: .8rem;
+	font-variant-caps: all-small-caps;
+	letter-spacing: .1rem;
 }
 </style>
 
@@ -116,13 +202,21 @@ header {
 			<span>Grand Theft</span>
 			<span>Berlin Bikes</span>
 		</h1>
+		<h2>
+			&#x1f6b2; Visualizing Bike Theft Data of Berlin &#x1f6b2;
+		</h2>
+		<author>by Gustav Neustadt 🙑</author>
+		<div class="video-wrapper">
+			<div class="background"></div>
+			<video src="public/background.mp4" autoplay loop></video>
+		</div>
 	</header>
-	<main>
+	<main bind:this={mainElement}>
 		<div class="text-content-wrapper">
-			<Texts index="{currentTextId}" isScrollDirectionUp={isScrollDirectionUp} />
+			<Texts index="{currentScrollIndex}" isScrollDirectionUp={isScrollDirectionUp} bind:textElements={textElements} />
 		</div>
 		<div class="graphs-wrapper">
-			<GraphCollection index={currentScrollIndex} bind:graphsElements={graphsElements} />
+			<GraphCollection index={currentScrollIndex} progress={progress} />
 		</div>
 	</main>
 {/if}
