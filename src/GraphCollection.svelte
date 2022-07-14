@@ -16,6 +16,10 @@
 	
 	const graphCollection: Graph[] = [
 		{
+			textId: 4,
+			component: TotalSum
+		},
+		{
 			textId: 0,
 			component: HighestTheftMap
 		},
@@ -30,10 +34,6 @@
 		{
 			textId: 3,
 			component: HighestDamageMonth
-		},
-		{
-			textId: 4,
-			component: TotalSum
 		},
 		{
 			textId: 5,
@@ -112,7 +112,7 @@
 	
 	.graph :global(.annotation-connector path) {
 		stroke: var(--colorTextMuted);
-		fill: var(--colorAccentPrimary);
+		fill: none;
 		stroke-width: .5;
 	}
 

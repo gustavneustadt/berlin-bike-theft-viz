@@ -61,5 +61,5 @@
 <NumberStatement
 	secondary
 >
-	{bikesAmountString} <span>bikes</span>
+	{bikesAmountString} <span>thefts</span>
 </NumberStatement>

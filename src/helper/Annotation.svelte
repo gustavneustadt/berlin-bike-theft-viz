@@ -4,8 +4,8 @@
 	export let highlight: boolean = false
 	
 	
-	export let x: number
-	export let y: number
+	export let x: number = null
+	export let y: number = null
 	export let note: {
 		label?: string,
 		title?: string,
@@ -20,7 +20,7 @@
 			right?: number,
 			left?: number
 		}
-	}
+	} = null
 	export let subject: {
 		x1: number,
 		x2: number
@@ -32,6 +32,47 @@
 	export let dx: number = 0
 	export let dy: number = 0
 	
+	export let annotationData: {
+		note?: {
+			label?: string,
+			title?: string,
+			align?: string
+			lineType?: string
+			padding?: number,
+			bgOpacity?: number,
+			wrap?: number,
+			bgPadding?: number|{
+				top?: number,
+				bottom?: number,
+				right?: number,
+				left?: number
+			}
+		},
+		type?: any,
+		dx?: number,
+		dy?: number,
+		x?: number,
+		y?: number,
+		subject?: {
+			x1: number,
+			x2: number
+		}|{
+			y1: number,
+			y2: number
+		}
+	} = {}
+	
+	$: data = {
+		note,
+		type,
+		dx,
+		dy,
+		subject,
+		x,
+		y,
+		...annotationData
+	}
+	
 	let wrapper
 	
 	document.fonts.ready.then((e) => {
@@ -42,15 +83,7 @@
 	
 	$: if(wrapper && fontLoaded) {
 		const makeAnnotation = annotation.annotation().annotations([
-			{
-				x,
-				y,
-				type,
-				dx,
-				dy,
-				note,
-				subject
-			}
+			data
 		])
 		
 		d3.select(wrapper).call(makeAnnotation).selectAll("*").attr("fill", null).attr("stroke", null).attr("opacity", null).attr("fill-opacity", null)
