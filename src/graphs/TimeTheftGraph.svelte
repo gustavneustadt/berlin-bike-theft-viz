@@ -1,10 +1,14 @@
 <script lang="ts">
 	import * as d3 from "d3"
+	import { getContext } from "svelte"
 	import { Tweened ,tweened } from "svelte/motion";
 	import { cubicOut } from "svelte/easing";
 	import SvgRect from '../helper/SvgRect.svelte'
+	import Color from "colorjs.io"
 	
 	export let data: TheftRecord[]
+	
+	const { colorScale, remap } = getContext("colors")
 	
 	let svg: SVGElement
 	
@@ -17,10 +21,10 @@
 	
 	
 	const margin = {
-		top: 20,
-		left: 35,
+		top: 30,
+		left: 45,
 		right: 0,
-		bottom: 20,
+		bottom: 40,
 		get verticalMargin() {  
 			return this.top + this.bottom 
 		},
@@ -41,17 +45,14 @@
 		rangedData,
 		g => d3.sum(g, d => d.probScore),
 		d => d.date.getHours(),
-		d => Math.floor(d.probScore*30) / 30,
+		d => Math.floor(d.probScore*50) / 50,
 	)
 	
 	$: sumPerBar = rolledUp.reduce((acc, curr) => {
 		return [...acc, [curr[0], d3.sum(curr[1], d => d[1])]]
 	},[])
 	
-	$: xBound = [
-		0,
-		24
-	]
+	$: xBound = [...Array(24)].map((_, i: number) => i)
 	
 	$: yBound = [
 		0,
@@ -78,19 +79,20 @@
 			return [d, reduced[i]]
 		})
 	}
+	const verticalAxisFormatter = new Intl.NumberFormat("fr")
 	
-	$: x = d3.scaleLinear()
+	$: x = d3.scaleBand()
 		.domain(xBound)
 		.range([0, width])
-		.nice()
+		.paddingInner(.25)
 
 	$: y = d3.scaleLinear()
 		.domain(yBound)
 		.range([height, 0])
 		.nice()
 
-	$: axisVertical = d3.axisLeft(y).tickSize(-width + barMargin).tickPadding(5)
-	$: axisHorizontal = d3.axisBottom(x).tickValues(d3.range(...xBound)).tickSize(0).tickPadding(10).offset(barWidth / 2)
+	$: axisVertical = d3.axisLeft(y).tickFormat(d => verticalAxisFormatter.format(d)).ticks(5).tickSize(-width).tickPadding(5)
+	$: axisHorizontal = d3.axisBottom(x).tickSize(0).tickPadding(10)
 	
 	$: if(svg) {
 		context.select("g.axis .horizontal").append("g").attr("transform", `translate(0, ${height})`).call(axisHorizontal)
@@ -99,8 +101,7 @@
 	
 	$: barMargin = 6
 	
-	$: barWidth = width / stacked.length - barMargin - 1
-	
+	$: barWidth = x.bandwidth()	
 </script>
 
 <style>
@@ -113,6 +114,29 @@
 
 <svg bind:this={svg} viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet">
 	<g transform="translate({margin.left}, {margin.top})">
+		<g class="axis">
+			<g class="vertical">
+				
+			</g>
+			<g class="horizontal">
+				
+			</g>
+			<text class="axis-label horizontal"
+				x={width / 2}
+				y={height + 40}
+				text-anchor="middle"
+			>
+				Hours
+			</text>
+			
+			<text class="axis-label vertical"
+				x={-4}
+				y={-20}
+				text-anchor="end"
+			>
+				Thefts
+			</text>
+		</g>
 		<g class="bars">
 			{#each stacked as stack, j}
 				<g
@@ -134,15 +158,10 @@
 							transform="translate(0 {y(bin[1][0]) - (height - y(bin[0][1]))})"
 						>	
 							<rect
-								class="bin-background"
-								height={height - y(bin[0][1])}
-								width={barWidth}
-							/>
-							<rect
 								class="bin"
 								height={height - y(bin[0][1])}
 								width={barWidth}
-								opacity={bin[0][0]}
+								style="--color: {colorScale(remap(bin[0][0], [0, 1], 0.8))}"
 							/>
 						</g>
 					{/each}			
@@ -151,14 +170,6 @@
 				</g>
 
 			{/each}
-		</g>
-		<g class="axis">
-			<g class="vertical">
-				
-			</g>
-			<g class="horizontal" transform="translate(0 0)">
-				
-			</g>
 		</g>
 	</g>
 </svg>

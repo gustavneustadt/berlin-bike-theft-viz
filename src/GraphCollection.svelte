@@ -7,6 +7,7 @@
 	import TotalSumWeek from './graphs/TotalSumWeek.svelte'
 	import BikeValueGraph from './graphs/BikeValueGraph.svelte'
 	import TimeTheftGraph from './graphs/TimeTheftGraph.svelte'
+	import HighestTheftMap from './graphs/HighestTheftMap.svelte'
 	
 	export let index: number
 	export let progress: number
@@ -16,6 +17,10 @@
 	const graphCollection: Graph[] = [
 		{
 			textId: 0,
+			component: HighestTheftMap
+		},
+		{
+			textId: 2,
 			component: BikeValueGraph
 		},
 		{
@@ -23,28 +28,24 @@
 			component: TimeTheftGraph
 		},
 		{
-			textId: 2,
+			textId: 3,
 			component: HighestDamageMonth
 		},
 		{
-			textId: 3,
-			component: TotalSum
-		},
-		{
 			textId: 4,
-			component: TotalSumWeek
+			component: TotalSum
 		},
 		{
 			textId: 5,
-			component: TotalSum
+			component: TotalSumWeek
 		}
 	]
 	
 	$: graph = graphCollection.find((d: Graph) => d.textId === index)
 	$: component = graph ? graph.component : null
 	
-	let opacityScale = d3.scaleLinear()
-		.domain([0, 0.3, 0.7, 1])
+	let opacityScale = d3.scaleSqrt()
+		.domain([0, 0.2, 0.8, 1])
 		.range([0, 100, 100, 0])
 		
 	$: opacity = opacityScale(progress)
@@ -82,11 +83,11 @@
 		width: 100%;
 	}
 	.graph :global(.bin) {
-		fill: var(--colorAccentPrimary);
+		fill: var(--color);
 		stroke: none;
 	}
 	.graph :global(.bin-background) {
-		fill: var(--colorTextMuted);
+		fill: var(--color);
 		/* stroke-width: .5; */
 		/* stroke: var(--colorTextPrimary); */
 		stroke: none;
@@ -114,11 +115,7 @@
 		fill: var(--colorAccentPrimary);
 		stroke-width: .5;
 	}
-	
-	.graph :global(.annotation .note-line) {
-		stroke: none;
-	}
-	
+
 	.graph :global(.annotation .connector-end) {
 		fill: var(--colorAccentPrimary);
 		stroke-width: 0;
@@ -127,6 +124,14 @@
 	}
 	.graph :global(.annotation-note-bg) {
 		display: none;
+	}
+	
+	.graph :global(svg text.axis-label) {
+		font-variant-caps: all-small-caps;	
+		font-weight: 400;
+		fill: var(--colorTextMutedDark);
+		letter-spacing: .1em;
+		font-size: .7rem;
 	}
 	
 	/* .graph :global(.highlight .annotation-note-bg) {

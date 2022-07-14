@@ -1,12 +1,12 @@
 <script lang="ts">
-import { onMount, setContext } from "svelte"
+import { onMount, setContext, getContext } from "svelte"
 import * as d3 from "d3"
 import Color from "colorjs.io"
-import { readable, Readable } from "svelte/store"
 
 import Scrollama from "scrollama"
 import Texts from "./Texts.svelte"
 import GraphCollection from './GraphCollection.svelte'
+import type Scale from "d3-scale"
 
 const scroller = Scrollama()
 let currentScrollIndex: number
@@ -15,33 +15,54 @@ let isScrollDirectionUp: boolean
 let textElements: HTMLDivElement[]
 
 let mainElement: HTMLElement
-let computedStyles: Map<string, Color>
 
 let data: TheftRecord[]
 
 $: setContext("theftData", data)
-$: setContext("styles", computedStyles)
+$: console.log(data)
 
-$: if(mainElement) { 
-	computedStyles = new Map()
-	const styles = [
-		"--colorAccentPrimary",
-		"--colorAccentSecondary",
-		"--colorAccentPrimaryMuted",
-		"--colorAccentSecondaryMuted"
-	]
-	const computed = getComputedStyle(mainElement)
-	
-	styles.forEach((d: string) => {
+setContext("colors", {
+	getColors: (element: Element) => {
+		const styles = [
+			// "--colorAccentPrimary",
+			// "--colorAccentPrimaryDecent",
+			// "--colorAccentPrimaryDark",
+			// "--colorAccentSecondary",
+			// "--colorAccentPrimaryMuted",
+			// "--colorAccentSecondaryMuted",
+			
+			"--colorScalePrimary",
+			"--colorScaleSecondary",
+			
+		]
+		const computed = getComputedStyle(element)
+		const styleMap: Map<string, Color> = new Map()
 		
-		const property = computed.getPropertyValue(d)
-		const color = Color.parse(property)
+		styles.forEach((d: string) => {
+			
+			const property = computed.getPropertyValue(d)
+			const color =  new Color(Color.parse(property))
+			
+			styleMap.set(d, color)
+		})
+		return styleMap
+	},
+	remap: (number: number, bound: [number, number] = [0, 1], exponent: number = 1, reverse: boolean = false): number => {
+		const targetBound = [0, 1]
 		
-		computedStyles.set(d, color)
-	})
-}
+		return d3.scaleSqrt()
+			.exponent(exponent)
+			.domain(bound)
+			.range(reverse ? targetBound.reverse : targetBound)(number)
+	},
+	get colorScale() {
+		const colors = this.getColors(document.querySelector("body"))
+		return colors.get("--colorScaleSecondary").range(colors.get("--colorScalePrimary"), {
+			space: colors.get("--colorScalePrimary").space
+		})
+	}
+})
 
-$: console.log(computedStyles)
 const url = 'https://corsproxy.io/?' + encodeURIComponent('https://www.internetwache-polizei-berlin.de/vdb/Fahrraddiebstahl.csv');
 
 onMount(async () => {
@@ -123,11 +144,11 @@ main > * {
 }
 
 h1 {
-	font-size: 8rem;
+	font-size: 1em;
 	display: flex;
 	flex-direction: column;
 	line-height: .9;
-	letter-spacing: -.2rem;
+	letter-spacing: -.01em;
 	color: var(--colorAccentPrimaryMuted);
 	text-align: center;
 	margin: 0;
@@ -135,17 +156,21 @@ h1 {
 
 h1 > span:first-child {
 	font-weight: 500;
-	font-size: 6rem;
+	font-size: .8em;
 }
 
 h2 {
-	font-weight: 300;
+	font-size: 1rem;
+	font-weight: 400;
 	color: var(--colorTextPrimary);
-	margin: none;
-	/* font-variant-caps: all-small-caps; */
-	/* letter-spacing: .1rem; */
+	text-align: center;
+	/* margin: none; */
+	font-variant-caps: all-small-caps;
+	letter-spacing: .1rem;
+	text-shadow: 0 1px 0 black, 0 0 2px black;
 }
 header {
+	font-size: min(min(8.5vw, 14vh), 8rem);
 	height: 100vh;
 	width: 100%;
 	left: 0;
@@ -156,6 +181,7 @@ header {
 	justify-content: center;
 	flex-direction: column;
 	z-index: 100;
+	text-shadow: 0 1.5px 0px black;
 }
 
 header > .video-wrapper {
@@ -171,7 +197,6 @@ header > .video-wrapper {
 	height: 100%;
 	object-fit: cover;
 	mix-blend-mode: hard-light;
-	/* opacity: .8; */
 	margin: none;
 }
 .video-wrapper .background {
@@ -193,6 +218,7 @@ author {
 	font-size: .8rem;
 	font-variant-caps: all-small-caps;
 	letter-spacing: .1rem;
+	text-align: center;
 }
 </style>
 
@@ -203,12 +229,12 @@ author {
 			<span>Berlin Bikes</span>
 		</h1>
 		<h2>
-			&#x1f6b2; Visualizing Bike Theft Data of Berlin &#x1f6b2;
+			Visualizing daily Bike Theft Data of Berlin
 		</h2>
 		<author>by Gustav Neustadt 🙑</author>
 		<div class="video-wrapper">
 			<div class="background"></div>
-			<video src="public/background.mp4" autoplay loop></video>
+			<video src="public/background_grey.mp4" autoplay loop></video>
 		</div>
 	</header>
 	<main bind:this={mainElement}>

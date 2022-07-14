@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as d3 from "d3"
+	import { getContext } from "svelte";
 	import { Tweened, tweened } from "svelte/motion"
 	import { cubicOut } from "svelte/easing"
 	import * as d3annotation from "d3-svg-annotation"
@@ -8,6 +9,7 @@
 	
 	export let data: TheftRecord[]
 	
+	const { colorScale, remap } = getContext("colors")
 	
 	let svg: SVGElement
 	
@@ -84,19 +86,15 @@
 	
 	$: median = d3.median(data, (d: TheftRecord) => d.damageAmount) 
 	
-	const verticalNumberFormatter = new Intl.NumberFormat("en", {
-		useGrouping: true
+	const verticalNumberFormatter = new Intl.NumberFormat("fr", {
 	})
 	
-	const horizontalNumberFormatter = new Intl.NumberFormat("en", {
+	const horizontalNumberFormatter = new Intl.NumberFormat("fr", {
 		style: "currency",
 		currency: "EUR",
 		maximumFractionDigits: 0,
 	})
-	
-	$: opacityScale = d3.scaleSqrt()
-		.domain(yBound)
-		.range([0, 1])
+		
 	$: axisVertical = d3.axisLeft(y).tickFormat((d: number) => verticalNumberFormatter.format(d)).ticks(4).tickSize(width).tickPadding(-width)
 	$: axisHorizontal = d3.axisBottom(x).tickFormat((d: number) => horizontalNumberFormatter.format(d)).ticks(5)
 	
@@ -133,34 +131,51 @@
 	
 	let mousePositionBinMiddle: number = 0
 	let hoverTextBound: string = ""
-	let hoverTextNumber: string = ""
+	let hoverTextNumber: number = 0
 	
 	$: if(mousePositionedBin >= 0){
 		mousePositionBinMiddle = bins[mousePositionedBin].x0 + (bins[mousePositionedBin].x1 - bins[mousePositionedBin].x0) / 2
 		hoverTextBound = `${horizontalNumberFormatter.format(bins[mousePositionedBin].x0)} – ${horizontalNumberFormatter.format(bins[mousePositionedBin].x1)}`
-		hoverTextNumber = verticalNumberFormatter.format(bins[mousePositionedBin].length)
+		hoverTextNumber = bins[mousePositionedBin].length
 	}
 	
 	$: svgBoundingRect = svg ? svg.getBoundingClientRect() : null
-	
-	$: colorScale = d3.scaleLinear()
-		.domain([0, 1])
-		.range([])
+
 </script>
 
 <style>
-
+g rect {
+	transition: fill .1s ease-in-out;
+}
+g.hide rect{
+	fill: var(--colorTextMutedDark);
+}
 </style>
 <svg bind:this={svg} viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet" pointer-events="all">
 	<g class="wrapper" transform="translate({margin.left}, {margin.top})" pointer-events="none">
 		<g class="axis">
 			<g class="vertical"></g>
 			<g class="horizontal" opacity={mouseEntered ? .3 : 1 }></g>
+			<text class="axis-label horizontal"
+				x={width / 2}
+				y={height + 40}
+				text-anchor="middle"
+				opacity={mouseEntered ? .3 : 1 }
+			>
+				Damage Amount →
+			</text>
+			<text class="axis-label vertical"
+				x={width}
+				text-anchor="end"
+			>
+				Thefts
+			</text>
+			
 		</g>
 		<g class="bars">
 			{#each bins as bin, i}
 			<g transform="translate({x(bin.x0)} {y(bin.length) + (height - y(bin.length)) * (1-$tweenedBinHeight)})">
-				<g transform="scale(1 {$tweenedBinHeight})" opacity={mouseEntered ? i === mousePositionedBin ? 1 : .3 : 1 }>
+				<g transform="scale(1 {$tweenedBinHeight})" class:hide={mouseEntered ? i === mousePositionedBin ? false : true : false }>
 					<clipPath id="bin-{i}">
 						<SvgRect
 							class="bin-background"
@@ -170,17 +185,11 @@
 						/>
 					</clipPath>
 					<rect
-						class="bin-background"
-						height={height - y(bin.length)} 
-						width={x(bin.x1 - bin.x0) - 1}
-						clip-path="url(#bin-{i})"
-					/>
-					<rect
 						class="bin"
 						height={height - y(bin.length)} 
 						width={x(bin.x1 - bin.x0) - 1}
 						clip-path="url(#bin-{i})"
-						opacity={opacityScale(bin.length)}
+						style="--color: {colorScale(remap(bin.length, yBound, .4))}"
 					/>
 				</g>
 			</g>
@@ -192,9 +201,9 @@
 					note={
 						{
 							title: hoverTextBound,
-							label: hoverTextNumber + " Theft" + (Number(hoverTextNumber) > 1 ? "s" : ""),
+							label: verticalNumberFormatter.format(hoverTextNumber) + " Theft" + (hoverTextNumber > 1 ? "s" : ""),
 							align: (x(mousePositionBinMiddle) / width > 0.8 ? "right" : "left"),
-							lineType: "horizontal",
+							lineType: "none",
 							padding: 10
 						}
 					}
@@ -212,7 +221,7 @@
 							title: "Median Damage",
 							label: horizontalNumberFormatter.format(median),
 							align: "dynamic",
-							lineType: "horizontal",
+							lineType: "none",
 							padding: 10
 						}
 					}

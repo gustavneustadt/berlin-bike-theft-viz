@@ -3,6 +3,7 @@ html {
 
 	--colorAccentPrimary: rgb(255, 185, 0);
 	--colorAccentPrimaryMuted: rgb(255, 230, 162);
+	--colorAccentPrimaryDecent: rgb(233, 222, 195);
 	
 	--colorAccentSecondary: rgb(160, 99, 200);
 	--colorAccentSecondaryMuted: rgb(216, 180, 240);
@@ -20,6 +21,8 @@ html {
 	--colorTextDark: rgb(26, 23, 15);
 	--colorTextDarkMuted: rgb(57, 51, 36);
 	
+	--colorScalePrimary: var(--colorAccentPrimary);
+	--colorScaleSecondary: var(--colorAccentPrimaryDecent);
 	
 	background: var(--colorBackground);
 }
@@ -32,7 +35,7 @@ html, body {
 }
 
 text, tspan, html {
-	font-family: "TheSans";
+	font-family: "TheMix", "system", "sans";
 	/* color: var(--accentDarkRGB);
 	color: var(--accentDark); */
 	color: var(--colorTextPrimary);
@@ -42,8 +45,10 @@ text, tspan, html {
 @supports (color: color(display-p3 1 1 1)) {
 	html {
 		--colorAccentPrimary: color(display-p3 1 0.725 0);
+		--colorAccentPrimaryDecent: color(display-p3 0.907 0.871 0.776);
 		--colorAccentPrimaryMuted: color(display-p3 0.977 0.887 0.648);
+		--colorAccentPrimaryDark: color(display-p3 0.165 0.153 0.124);
 		
-		--colorAccentSecondary: color(display-p3 0.494 0.072 0.858);
-		--colorAccentSecondaryMuted: color(display-p3 0.796 0.611 0.961);
+		--colorAccentSecondary: color(display-p3 0 0.822 1);
+		--colorAccentSecondaryMuted: color(display-p3 0.512 0.793 0.854);
 }

@@ -31,7 +31,7 @@
 	$: tweenedValues.set(filteredGroup[1])
 	
 	const damageAmountString = (number: number = null) => {
-		return "~" + new Intl.NumberFormat("en", {
+		return "~" + new Intl.NumberFormat("fr", {
 			useGrouping: true,
 			maximumFractionDigits: 0,
 			maximumSignificantDigits: 3

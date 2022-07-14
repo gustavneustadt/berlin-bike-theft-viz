@@ -13,6 +13,7 @@
 		lineType?: string
 		padding?: number,
 		bgOpacity?: number,
+		wrap?: number,
 		bgPadding?: number|{
 			top?: number,
 			bottom?: number,
@@ -27,9 +28,9 @@
 		y1: number,
 		y2: number
 	} = null
-	export let type: any
-	export let dx: number
-	export let dy: number
+	export let type: any = annotation.annotationLabel
+	export let dx: number = 0
+	export let dy: number = 0
 	
 	let wrapper
 	

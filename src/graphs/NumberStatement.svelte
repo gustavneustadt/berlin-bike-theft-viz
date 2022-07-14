@@ -38,7 +38,7 @@
 		border: .4rem solid;
 		border-color: var(--colorTextDark);
 		color: var(--colorTextDark);
-		background: var(--colorAccentPrimaryMuted);
+		background: var(--colorTextPrimary);
 		border-radius: 1rem;
 		padding: .5rem 1rem;
 		text-align: right;

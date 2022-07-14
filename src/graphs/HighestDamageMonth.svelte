@@ -34,7 +34,7 @@
 		}).format((number ? number : highestMonth[1][0]) / 1000000) + " mil"
 	}
 	
-	$: bikesAmountString = new Intl.NumberFormat("en", {
+	$: bikesAmountString = new Intl.NumberFormat("fr", {
 		useGrouping: true,
 		maximumFractionDigits: 0
 	}).format($tweenedValues[1])
