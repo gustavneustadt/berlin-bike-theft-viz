@@ -10,7 +10,7 @@
 	const flyDuration: number = 400
 	
 	const texts: ([string, string]|string)[] = [
-		["Bike Thefts", "Berlin is one of a few german cities maintaining an <a href='https://daten.berlin.de' target='_blank'>online service</a> to provide free and open access to data, gathered by public institutions.\n With their Online Police Department, the Berlin Police is fulfilling the Digitalization Strategy by the government. Citizens are able to report crimes, ask questions or pay their panalties. Since September 2021, the police have been testing a free access to daily updating bicycle theft data of the city – the oldest data is from January 2021."],
+		["Bike Thefts", "Berlin is one of a few german cities maintaining an <a href='https://daten.berlin.de' target='_blank'>online service</a> to provide free and open access to data, gathered by public institutions.\n With their Online Police Department, the Berlin Police is fulfilling the Digitalization Strategy by the government. Citizens are able to report crimes, ask questions or pay their panalties. Since September 2021, the police have been testing a free access to daily updating bicycle theft data of the city – data starting from January 2021."],
     
 		"From 2016 to 2021, in the latest crime report, bike thefts declined in average 5.8 % each year in Berlin.\n",
     "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla quam quos tempore reiciendis consectetur alias ratione velit quibusdam magni accusamus enim minus ducimus nostrum provident nihil, molestias ullam mollitia officia?",

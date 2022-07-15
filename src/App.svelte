@@ -121,6 +121,9 @@ function getDateFrom(date: string, hour: string): Date {
 
 let progress: number = 0
 
+let videoElement
+
+$: if(videoElement) { videoElement.play() }
 
 </script>
 
@@ -130,7 +133,6 @@ let progress: number = 0
 	display: flex;
 	gap: 1rem;
 	flex-direction: column;
-	scroll-snap-type: y mandatory;
 	}
 main {
 	display: flex;
@@ -139,8 +141,13 @@ main {
 	margin: 0 auto;
 }
 
-main > * {
-	flex: 50%;
+.text-content-wrapper {
+	max-width: 30rem;
+	flex: 1 1 50%;
+}
+.graphs-wrapper {
+	flex: 1 2 50%;
+	max-width: 70rem;
 }
 
 h1 {
@@ -234,7 +241,10 @@ author {
 		<author>by Gustav Neustadt 🙑</author>
 		<div class="video-wrapper">
 			<div class="background"></div>
-			<video src="public/background_grey.mp4" autoplay loop></video>
+			<video src="/background_grey.mp4" muted autoplay playsinline loop></video>
+				<!-- <source src="/background_grey.webm" type="video/webm"/>
+				<source src="/background_grey.mp4" type="video/mp4"/>
+			</video> -->
 		</div>
 	</header>
 	<main bind:this={mainElement}>
