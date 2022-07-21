@@ -1,19 +1,18 @@
 <script lang="ts">
 	import * as d3 from "d3"
 	import { onMount, getContext } from "svelte"
-	import Annotation from '../helper/Annotation.svelte'
 	import type { FeatureCollection, Feature } from "geojson"
-	import * as annotation from "d3-svg-annotation"
-	
+
 	let svg: SVGElement
 	export let data: TheftRecord[]
-	
 	let featureData: FeatureCollection
 	let hovering: boolean[] = []
 	
 	$: isHovering = hovering.includes(true)
 	$: centroid = featureData ? featureData.features.map((feature: Feature) => (): [number, number] => path.centroid(feature)) : []
+	
 	$: context = d3.select(svg)
+
 	
 	const { remap, colorScale } = getContext("colors")
 	
@@ -163,6 +162,7 @@
 	svg .annotation-bottom .annotation-connector path {
 		stroke: var(--colorAccentPrimary);
 		stroke-width: 2;
+		stroke-linecap: round;
 	}
 	svg .infotext {
 		font-size: .5rem;
@@ -215,7 +215,7 @@
 								<path d="M 0 -15, 
 								L 
 								{((centroid[i]()[0]) * mapZoomTransform.k) + mapZoomTransform.x - width / 2} 
-								{clampNumber((centroid[i]()[1]) * mapZoomTransform.k - height + mapZoomTransform.y - 15, -15, -height-18)}"/>
+								{clampNumber((centroid[i]()[1]) * mapZoomTransform.k - height + mapZoomTransform.y - 18, -15, -height-18)}"/>
 								
 							</g>
 						</g>

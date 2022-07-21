@@ -47,7 +47,7 @@
     font-family: 'TheMix';
     src: url('TheMix-ExtraBold.woff2') format('woff2'),
         url('TheMix-ExtraBold.woff') format('woff');
-    font-weight: bold;
+    font-weight: 800;
     font-style: normal;
     font-display: swap;
 }
@@ -65,7 +65,7 @@
     font-family: 'TheMix';
     src: url('TheMix-BoldItalic.woff2') format('woff2'),
         url('TheMix-BoldItalic.woff') format('woff');
-    font-weight: bold;
+    font-weight: 700;
     font-style: italic;
     font-display: swap;
 }
@@ -74,7 +74,7 @@
     font-family: 'TheMix';
     src: url('TheMix-Plain.woff2') format('woff2'),
         url('TheMix-Plain.woff') format('woff');
-    font-weight: normal;
+    font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
@@ -83,7 +83,7 @@
     font-family: 'TheMix SemiLight';
     src: url('TheMix-SemiLightItalic.woff2') format('woff2'),
         url('TheMix-SemiLightItalic.woff') format('woff');
-    font-weight: 300;
+    font-weight: 400;
     font-style: italic;
     font-display: swap;
 }
@@ -101,7 +101,7 @@
     font-family: 'TheMix';
     src: url('TheMix-ExtraBoldItalic.woff2') format('woff2'),
         url('TheMix-ExtraBoldItalic.woff') format('woff');
-    font-weight: bold;
+    font-weight: 800;
     font-style: italic;
     font-display: swap;
 }
@@ -110,7 +110,7 @@
     font-family: 'TheMix SemiLight';
     src: url('TheMix-SemiLight.woff2') format('woff2'),
         url('TheMix-SemiLight.woff') format('woff');
-    font-weight: 300;
+    font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
@@ -128,7 +128,7 @@
     font-family: 'TheMix';
     src: url('TheMix-PlainItalic.woff2') format('woff2'),
         url('TheMix-PlainItalic.woff') format('woff');
-    font-weight: normal;
+    font-weight: 500;
     font-style: italic;
     font-display: swap;
 }
@@ -137,7 +137,7 @@
     font-family: 'TheMix';
     src: url('TheMix-Bold.woff2') format('woff2'),
         url('TheMix-Bold.woff') format('woff');
-    font-weight: bold;
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }

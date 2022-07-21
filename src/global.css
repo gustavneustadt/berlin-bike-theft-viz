@@ -32,6 +32,7 @@ html, body {
 	left: 0;
 	margin: none;
 	padding: none;
+	font-weight: 500;
 }
 
 text, tspan, html {

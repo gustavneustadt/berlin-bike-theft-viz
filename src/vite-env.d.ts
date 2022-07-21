@@ -3,15 +3,15 @@
 declare module "d3";
 
 interface TheftRecord {
-	lor: number;
-	bikeType: string;
-	dateStart: Date;
-	dateEnd: Date;
-	dateRange: TheftRecordProbItem[];
-	dateDurationHours: number;
-	burglary: boolean;
-	damageAmount: number;
-	attemptedTheft: boolean;
+	lor: number
+	bikeType: string
+	dateStart: Date
+	dateEnd: Date
+	dateRange: TheftRecordProbItem[]
+	dateDurationHours: number
+	burglary: boolean
+	damageAmount: number
+	attemptedTheft: boolean
 }
 
 interface TheftRecordProbItem {
@@ -20,6 +20,17 @@ interface TheftRecordProbItem {
 }
 
 interface Graph {
-	textId: number,
+	textId: number
 	component?: SvelteComponent
+}
+
+interface StoryText {
+	subtitle?: string
+	text: string
+	component: 
+}
+
+interface StorySection {
+	title?: string
+	texts: StoryText[]
 }

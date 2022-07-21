@@ -10,11 +10,9 @@ import type Scale from "d3-scale"
 
 const scroller = Scrollama()
 let currentScrollIndex: number
-let currentTextId: number
 let isScrollDirectionUp: boolean
 let textElements: HTMLDivElement[]
 
-let mainElement: HTMLElement
 
 let data: TheftRecord[]
 
@@ -23,17 +21,9 @@ $: console.log(data)
 
 setContext("colors", {
 	getColors: (element: Element) => {
-		const styles = [
-			// "--colorAccentPrimary",
-			// "--colorAccentPrimaryDecent",
-			// "--colorAccentPrimaryDark",
-			// "--colorAccentSecondary",
-			// "--colorAccentPrimaryMuted",
-			// "--colorAccentSecondaryMuted",
-			
+		const styles = [	
 			"--colorScalePrimary",
 			"--colorScaleSecondary",
-			
 		]
 		const computed = getComputedStyle(element)
 		const styleMap: Map<string, Color> = new Map()
@@ -94,22 +84,6 @@ onMount(async () => {
 
 		})
 	})
-  
-  scroller
-	.setup({
-		step: textElements,
-		progress: true
-	})
-	.onStepEnter(response => {
-		// console.log(response)
-		isScrollDirectionUp = response.direction == "up"
-		currentScrollIndex = response.index
-		currentTextId = Number(response.element.dataset.textId)
-	})
-	.onStepProgress(response => {
-		progress = response.progress
-	})
-	.resize()
 })
 
 function getDateFrom(date: string, hour: string): Date {
@@ -241,13 +215,13 @@ author {
 		<author>by Gustav Neustadt 🙑</author>
 		<div class="video-wrapper">
 			<div class="background"></div>
-			<video src="/background_grey.mp4" muted autoplay playsinline loop></video>
-				<!-- <source src="/background_grey.webm" type="video/webm"/>
+			<video muted autoplay playsinline loop>
 				<source src="/background_grey.mp4" type="video/mp4"/>
-			</video> -->
+				<source src="/background_grey.webm" type="video/webm"/>
+			</video>
 		</div>
 	</header>
-	<main bind:this={mainElement}>
+	<main>
 		<div class="text-content-wrapper">
 			<Texts index="{currentScrollIndex}" isScrollDirectionUp={isScrollDirectionUp} bind:textElements={textElements} />
 		</div>
