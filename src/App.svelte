@@ -7,6 +7,7 @@ import Scrollama from "scrollama"
 import Texts from "./Texts.svelte"
 import GraphCollection from './GraphCollection.svelte'
 import type Scale from "d3-scale"
+import ContentController from './ContentController.svelte'
 
 const scroller = Scrollama()
 let currentScrollIndex: number
@@ -103,25 +104,11 @@ $: if(videoElement) { videoElement.play() }
 
 <style>
 
-.graphs-wrapper {
-	display: flex;
-	gap: 1rem;
-	flex-direction: column;
-	}
 main {
 	display: flex;
-	align-items: stretch;
 	max-width: 80vw;
 	margin: 0 auto;
-}
-
-.text-content-wrapper {
-	max-width: 30rem;
-	flex: 1 1 50%;
-}
-.graphs-wrapper {
-	flex: 1 2 50%;
-	max-width: 70rem;
+	position: relative;
 }
 
 h1 {
@@ -177,7 +164,8 @@ header > .video-wrapper {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	mix-blend-mode: hard-light;
+	/* mix-blend-mode: hard-light; */
+	opacity: .9;
 	margin: none;
 }
 .video-wrapper .background {
@@ -212,21 +200,16 @@ author {
 		<h2>
 			Visualizing daily Bike Theft Data of Berlin
 		</h2>
-		<author>by Gustav Neustadt 🙑</author>
+		<author>by Gustav Neustadt</author>
 		<div class="video-wrapper">
 			<div class="background"></div>
 			<video muted autoplay playsinline loop>
-				<source src="/background_grey.mp4" type="video/mp4"/>
-				<source src="/background_grey.webm" type="video/webm"/>
+				<source src="/background_new.mp4" type="video/mp4"/>
+				<!-- <source src="/background_grey.webm" type="video/webm"/> -->
 			</video>
 		</div>
 	</header>
 	<main>
-		<div class="text-content-wrapper">
-			<Texts index="{currentScrollIndex}" isScrollDirectionUp={isScrollDirectionUp} bind:textElements={textElements} />
-		</div>
-		<div class="graphs-wrapper">
-			<GraphCollection index={currentScrollIndex} progress={progress} />
-		</div>
+		<ContentController />
 	</main>
 {/if}

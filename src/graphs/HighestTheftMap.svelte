@@ -1,26 +1,38 @@
 <script lang="ts">
 	import * as d3 from "d3"
 	import { onMount, getContext } from "svelte"
+	import { Tweened, tweened } from "svelte/motion";
+	import { cubicInOut } from "svelte/easing";
 	import type { FeatureCollection, Feature } from "geojson"
+	import SvgRect from './../helper/SvgRect.svelte'
 
 	let svg: SVGElement
 	export let data: TheftRecord[]
 	let featureData: FeatureCollection
 	let hovering: boolean[] = []
 	
+	let weekDayFilter: number = 0
+	
 	$: isHovering = hovering.includes(true)
 	$: centroid = featureData ? featureData.features.map((feature: Feature) => (): [number, number] => path.centroid(feature)) : []
 	
 	$: context = d3.select(svg)
 
-	
 	const { remap, colorScale } = getContext("colors")
 	
+	$: rollupData = data.filter((d: TheftRecord) => d.dateStart.getDay() === weekDayFilter)
+	
+	$: console.log({rollupData})
+	
 	$: rollup = d3.rollup(
-		data,
+		rollupData,
 		(g: TheftRecord[]) => g.length,
 		(d: TheftRecord) => d.lor
 	)
+	
+	
+	// $: console.log(rollupWeekDay)
+	
 	$: sum = data.length
 	$: colorBound = [
 		0,
@@ -34,7 +46,7 @@
 	$: maxFeature = featureData ? featureData.features.find((d: Feature) => Number(d.properties.PLR_ID) === maxItem[0]) : null
 	$: maxFeatureIndex = featureData ? featureData.features.findIndex((d: Feature) => Number(d.properties.PLR_ID) === maxItem[0]) : null
 	
-	const color = (feature: Feature) => {
+	$: color = (feature: Feature) => {
 		const number = rollup.get(Number(feature.properties.PLR_ID))
 		if(!number) {
 			return colorScale(0)
@@ -79,7 +91,7 @@
 		top: 30,
 		left: 0,
 		right: 0,
-		bottom: 50,
+		bottom: 100,
 		get verticalMargin() {  
 			return this.top + this.bottom 
 		},
@@ -125,6 +137,28 @@
 	const unhover = (): void => {
 		hovering = hovering.map(_ => false)
 	}
+	
+	const dayFormatter = new Intl.DateTimeFormat("en", {
+		weekday: "short"
+	})
+	
+	const weekdays: string[] = [...Array(7)].map((_, d: number): [number, string] => {
+		const date = new Date
+		date.setDate(d)
+		return [date.getDay(), dayFormatter.format(date)]
+	}).sort().map(d => d[1])
+	
+	const weekdaySelectPosition = (weekday) => {
+		return (weekday + .5)*(width / weekdays.length)
+	}
+	
+	const weekdayPosition: Tweened<number> = tweened(weekdaySelectPosition(weekDayFilter), {
+		duration: 300,
+		easing: cubicInOut
+	})
+	
+	$: weekdayPosition.set(weekdaySelectPosition(weekDayFilter))
+	
 </script>
 
 <style>
@@ -170,9 +204,65 @@
 		font-variant-caps: all-small-caps;
 		letter-spacing: .05rem;
 	}
+	.weekday {
+		fill: var(--colorTextMuted);
+		font-variant-caps: all-small-caps;
+		letter-spacing: .1rem;
+	}
+	.weekday-wrapper:hover .weekday {
+		fill: var(--colorAccentPrimaryMuted);
+	}
+	
+	.weekday-wrapper {
+		cursor: pointer;
+	}
+	
+	.weekday.selected {
+		fill: var(--colorAccentPrimary);
+		font-weight: 500;
+	}
+	
+	svg :global(.weekday-background) {
+		fill: transparent;
+		/* stroke: var(--colorTextMutedDark);
+		stroke-width: .5; */
+	}
+	svg :global(.weekday-select-background) {
+		fill: var(--colorAccentPrimary);
+	}
 </style>
 
 <svg bind:this={svg} pointer-events="all" viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet" on:mouseleave={unhover}>
+	<g transform="translate(0 {height + 100})" class="weekdays">
+			<SvgRect 
+				x={$weekdayPosition}
+				xFunc={(rectWidth, _) => rectWidth / -2}
+				class="weekday-select-background"
+				r={1}
+				y={20}
+				height={2}
+				width={40}
+			/>
+		{#each weekdays as weekday, i}
+			<g class="weekday-wrapper" transform="translate({(i + .5)*(width / weekdays.length)} 0)">
+				<text dy={1.5} alignment-baseline="hanging" class="weekday"
+			    class:selected={i === weekDayFilter} text-anchor="middle">
+					{weekday}
+				</text>
+				<SvgRect 
+					on:click={() => weekDayFilter = i}
+					xFunc={(rectWidth, _) => {
+						return rectWidth / -2
+					}}
+					class="weekday-background"
+					r={5}
+					height={20}
+					width={50}
+				/>
+			</g>
+		{/each}
+	</g>
+	
 	<clipPath id="mapClipPath">
 		<rect width={width} height={height}/>
 	</clipPath>

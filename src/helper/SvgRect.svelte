@@ -1,10 +1,29 @@
 <script lang="ts">
+	type PositionFunction = (width: number, height: number) => number
+	
 	export let width: number = 10
 	export let height: number = 10
 	export let r: [number, number, number, number]|[number, number]|number = 0
 	export let sharpness: number = 0.6
 	
-	function getPath(w: number, h: number, radius: [number, number, number, number]|[number, number]|number, sharpness: number): string {
+	export let x: number = 0
+	export let y: number = 0
+	
+	export let xFunc: PositionFunction = (w, h): number => 0
+	export let yFunc: PositionFunction = (w, h): number => 0
+	
+	$: xFuncValue = xFunc(width, height)
+	$: yFuncValue = yFunc(width, height)
+	
+	$: xPosition = xFuncValue + x 
+	$: yPosition = yFuncValue + y
+	
+	const getPath = function(
+		w: number, 
+		h: number, 
+		x: number,
+		y: number,
+		radius: [number, number, number, number]|[number, number]|number, sharpness: number): string {
 		const normalized = false
 		
 		const shortestEdge = w >= h ? h : w
@@ -62,37 +81,8 @@
 					return [name, clampNumber(length, 0, shortestEdge / 2)]
 				}
 			)
-			// Object.entries(cornerRadius).sort((a: [string, number], b: [string, number]) => b[1] - a[1]).forEach(
-			// 	([name, length]: [string, number]) => {
-			// 	const edgeNames: [string, string] = edges[name]
-			// 	const shortestEdge: string = availableSpace[edgeNames[0]] < availableSpace[edgeNames[1]] ? edgeNames[0] : edgeNames[1]
-			// 	const shortestEdgeSpace: number = availableSpace[shortestEdge]
-			// 	
-			// 	const edgeRival = Object.entries(edges).find((d: [string, string[]]) => {
-			// 		return d[1].includes(shortestEdge) && d[0] !== name
-			// 	})
-			// 	
-			// 	const edgeRivalLength = cornerRadius[edgeRival[0]]
-			// 	
-			// 	let takenSpace: number = 0
-			// 	
-			// 	if(edgeRivalLength + length > shortestEdgeSpace) {
-			// 		const lengthSum = edgeRivalLength + length
-			// 		calcLengths.push([edgeRival[0], edgeRivalLength / lengthSum * shortestEdgeSpace])
-			// 		availableSpace[]
-			// 		
-			// 		
-			// 		takenSpace = length / lengthSum * shortestEdgeSpace
-			// 	} else {
-			// 		takenSpace = clampNumber(length, 0, shortestEdgeSpace)
-			// 		calcLengths.push([name, takenSpace])
-			// 	}
-			// 	availableSpace[edgeNames[0]] = availableSpace[edgeNames[0]] - takenSpace
-			// 	availableSpace[edgeNames[1]] = availableSpace[edgeNames[1]] - takenSpace
-			// })
-			
+
 			cornerRadius = Object.fromEntries(calcLengths)
-			
 		}
 		
 		const cornerSharpness = {
@@ -147,28 +137,28 @@
 		const corners = {
 			a: cornerAngle,
 			tl: {
-				xa: 0.0,
-				ya: cornerLength.tl.y,
-				xb: cornerLength.tl.x,
-				yb: 0.0
+				xa: 0.0 + x,
+				ya: cornerLength.tl.y + y,
+				xb: cornerLength.tl.x + x,
+				yb: 0.0 + y
 			},
 			tr: {
-				xa: w - cornerLength.tr.x,
-				ya: 0.0,
-				xb: w,
-				yb: cornerLength.tr.y
+				xa: w - cornerLength.tr.x + x,
+				ya: 0.0 + y,
+				xb: w + x,
+				yb: cornerLength.tr.y + y
 			},
 			br: {
-				xa: w,
-				ya: (h - cornerLength.br.y),
-				xb: (w - cornerLength.br.x),
-				yb: h
+				xa: w + x,
+				ya: (h - cornerLength.br.y) + y,
+				xb: (w - cornerLength.br.x) + x,
+				yb: h + y
 			},
 			bl: {
-				xa: cornerLength.bl.x,
-				ya: h,
-				xb: 0,
-				yb: h - cornerLength.bl.y
+				xa: cornerLength.bl.x + x,
+				ya: h + y,
+				xb: 0 + x,
+				yb: h - cornerLength.bl.y + y
 			},
 		}
 		
@@ -185,7 +175,8 @@
 		
 		return path.replace(/\n/g, '')
 	}	
-	$: path = getPath(width, height, r, sharpness)
+	
+	$: path = getPath(width, height, xPosition, yPosition, r, sharpness)
 
 	
 </script>
@@ -194,5 +185,5 @@
 
 </style>
 
-<path d={path} class={$$props.class}>
+<path on:click d={path} class={$$props.class} fill={$$props.fill} stroke={$$props.stroke}>
 </path>

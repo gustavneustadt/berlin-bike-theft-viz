@@ -27,10 +27,10 @@ interface Graph {
 interface StoryText {
 	subtitle?: string
 	text: string
-	component: 
 }
 
 interface StorySection {
 	title?: string
 	texts: StoryText[]
+	component?: SvelteComponent
 }
