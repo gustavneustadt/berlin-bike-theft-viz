@@ -201,7 +201,6 @@
 	
 	
 	$: if(!yBoundTweenedTarget.equals(yBound)) {
-		console.log({yBoundTweenedTarget, yBound}, yBoundTweenedTarget == yBound )
 		yBoundTweened.set(yBound)
 		yBoundTweenedTarget = yBound
 	}
