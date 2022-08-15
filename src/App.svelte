@@ -25,6 +25,8 @@ setContext("colors", {
 		const styles = [	
 			"--colorScalePrimary",
 			"--colorScaleSecondary",
+			"--colorAccentPrimary",
+			"--colorBackground"
 		]
 		const computed = getComputedStyle(element)
 		const styleMap: Map<string, Color> = new Map()
@@ -38,6 +40,9 @@ setContext("colors", {
 		})
 		return styleMap
 	},
+	get colors() {
+		return this.getColors(document.querySelector("body"))
+	},
 	remap: (number: number, bound: [number, number] = [0, 1], exponent: number = 1, reverse: boolean = false): number => {
 		const targetBound = [0, 1]
 		
@@ -48,8 +53,11 @@ setContext("colors", {
 	},
 	get colorScale() {
 		const colors = this.getColors(document.querySelector("body"))
-		return colors.get("--colorScaleSecondary").range(colors.get("--colorScalePrimary"), {
-			space: colors.get("--colorScalePrimary").space
+		return this.createColorScale(colors.get("--colorScaleSecondary"), colors.get("--colorScalePrimary"))
+	},
+	createColorScale(colorA: Color, colorB: Color) {
+		return colorA.range(colorB, {
+			space: colorA.space
 		})
 	}
 })
