@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SvelteComponent } from "svelte"
-	import Scrollama from "scrollama"
+	import { Tweened, tweened } from "svelte/motion";
+	import { cubicInOut } from "svelte/easing";
 	import * as d3 from "d3"
 	import Scrolly from './helper/Scrolly.svelte';
 
@@ -142,25 +143,6 @@
 	
 	let textElements: HTMLDivElement[][]
 	
-	$: if(textElements) { 
-		// scroller
-		// .setup({
-		// 	step: textElements.flat(),
-		// 	progress: true
-		// })
-		// .onStepEnter(response => {
-		// 	const storySectionId = response.element.dataset.storySectionId.split("-")
-		// 	currentStoryTextIndex = Number(storySectionId[1])
-		// 	currentStorySectionIndex = Number(storySectionId[0])
-		// })
-		// .onStepProgress(response => {
-		// 	progress = response.progress
-		// 	const storySectionId = response.element.dataset.storySectionId.split("-")
-		// 	currentStorySectionIndex = Number(storySectionId[0])
-		// })
-		// .resize()
-	}
-	
 	$: {
 		const [storySectionIndex, storyTextIndex] = scrollyData?.storySectionId.split("-").map(Number) ?? [null, null]
 		
@@ -173,18 +155,9 @@
 		}
 	}
 	
-	let opacityScale = d3.scaleSqrt()
-		.domain([0, 0.3, 0.7, 1])
-		.range([0, 100, 100, 0])
-	
-	let storySectionProgress = 0
-	$: storySectionProgress = ((currentStoryTextIndex ?? 0) + progress ?? 0) / currentStorySectionTextCount
-	$: opacityProgress = currentStorySectionTextCount === 1 ? progress : currentStoryTextIndex === 0 ? progress / 2 : currentStoryTextIndex === currentStorySectionTextCount - 1 ? progress / 2 + .5 : .5
-	
-	$: opacity = opacityScale(opacityProgress)
-	
 	let scrollyVal: number
 	let scrollyData: DOMStringMap
+
 
 </script>
 
@@ -219,7 +192,6 @@
 			storySections={storySections} 
 			currentStorySectionIndex={currentStorySectionIndex} 
 			currentStoryTextIndex={currentStoryTextIndex}
-			currentStoryTextProgress={progress}
 		/>
 	</Scrolly>
 </div>

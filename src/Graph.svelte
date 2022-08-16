@@ -1,20 +1,29 @@
 <script lang="ts">
 	import { getContext } from 'svelte'
 	import type { SvelteComponent } from "svelte"
+	import { fade } from "svelte/transition"
+	import {cubicInOut} from "svelte/easing"
 	
 	let data: TheftRecord[] = getContext("theftData")
 	export let step: number
 	export let stepCount: number
 	export let component: SvelteComponent
+	
+	const fadeDuration = 150
 </script>
 
-<div class="graph">
+{#key component}
+<div class="graph" 
+in:fade={{delay: fadeDuration, duration: fadeDuration, easing: cubicInOut}} 
+out:fade={{duration: fadeDuration, easing: cubicInOut}}>
 	<svelte:component this={component} data={data} step={step} stepCount={stepCount}/>				
 </div>
+{/key}
 
 <style>
 	.graph {
 		/* position: sticky; */
+		position: absolute;
 		width: 100%;
 		max-height: 100%;
 	}
