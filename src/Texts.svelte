@@ -11,23 +11,22 @@
 
 </script>
 
-<div class="wrapper">
-	{#each storySections as storySection, i}
-			{#each storySection.texts as sectionText, j}
-				<div class="text-wrapper" bind:this={textElements[i][j]} data-story-section-id="{i}-{j}" style="opacity: {currentStoryTextIndex === j && currentStorySectionIndex === i ? 1: .2}">
-					{#if j === 0 && storySection.title}
-						<h3>{storySection.title}</h3>
-					{/if}
-					{#if sectionText.subtitle}
-						<h4>
-							{sectionText.subtitle}
-						</h4>
-					{/if}
-	    			<Paragraphizer text={sectionText.text} />
-				</div>
-			{/each}
-  {/each}
-</div>
+{#each storySections as storySection, i}
+		{#each storySection.texts as sectionText, j}
+			<div class="text-wrapper" bind:this={textElements[i][j]} data-story-section-id="{i}-{j}" style="opacity: {currentStoryTextIndex === j && currentStorySectionIndex === i ? 1: .2}">
+				{#if j === 0 && storySection.title}
+					<h3>{storySection.title}</h3>
+				{/if}
+				{#if sectionText.subtitle}
+					<h4>
+						{sectionText.subtitle}
+					</h4>
+				{/if}
+    			<Paragraphizer text={sectionText.text} />
+			</div>
+		{/each}
+{/each}
+
 
 <style>
 	h3 {
@@ -38,20 +37,13 @@
 		color: var(--colorTextMuted);
 		font-weight: 400;
 	}
-	.wrapper {
-		scroll-snap-type: y mandatory;
-		position: relative;
-		/* top: 2rem; */
-		padding: 2rem 2rem 0 0;
-		max-width: 30rem;
-		line-height: 1.6;
-	}
 	.text-wrapper {
 		scroll-snap-align: start;
 		min-height: 50vh;
 		transition: opacity .3s ease-in-out;
 		padding: 0 0 10rem;
 		box-sizing: border-box;
+		line-height: 1.6;
 	}
 	
 	.text-wrapper :global(a) {

@@ -16,6 +16,7 @@
 	.graph {
 		/* position: sticky; */
 		width: 100%;
+		max-height: 100%;
 	}
 	
 	.graph :global(.axis g .domain) {
@@ -33,6 +34,7 @@
 	}
 	.graph :global(svg) {
 		width: 100%;
+		height: 100%;
 	}
 	.graph :global(.bin) {
 		fill: var(--color);

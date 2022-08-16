@@ -202,37 +202,25 @@
 		return [date.getDay(), dayFormatter.format(date)]
 	}).sort().map(d => d[1])
 	
-	const weekdaySelectPosition = (weekday) => {
-		return (weekday + .5)*(width / weekdays.length)
-	}
-	
-	const weekdayPosition: Tweened<number> = tweened(weekdaySelectPosition(weekDayFilter), {
-		duration: 300,
-		easing: cubicInOut
-	})
-	
-	$: weekdayPosition.set(weekdaySelectPosition(weekDayFilter))
-	
-	
 	const x = d3.scaleBand()
 		.domain([0, 1, 2, 3, 4, 5, 6])
-		.range([0, width])
+		.range([50, width - 50])
 		.paddingOuter(-.25)
 	
 	$: y = d3.scaleLinear()
 		.domain([maxSelectedData, 0])
-		.range([0, 70])
+		.range([0, 40])
 	
 	$: area = d3.area()
 		.curve(d3.curveMonotoneX)
-		.x( d => x(d[0]))
-		.y1( d => y(d[1]))
+		.x( (_, i) => x(i))
+		.y1( d => d)
 		.y0(y(0))
-		
+	
 	$: line = d3.line()
 		.curve(d3.curveMonotoneX)
-		.x( d => x(d[0]))
-		.y( d => y(d[1]))
+		.x( (_, i) => x(i))
+		.y( d => d)
 
 		
 	$: maxSelectedData = selectedDataRolledUp ? Math.max(...selectedDataRolledUp.map(d => d[1])) : 0
@@ -246,11 +234,16 @@
 		(d: TheftRecord) => d.dateEnd.getDay()
 	) : null
 	
-	$: selectedDataFilled = selectedDataRolledUp ? x.domain().map((d: number) => selectedDataRolledUp.find((i: [number, number]) => i[0] === d) ?? [d, 0]) : []
+	$: selectedDataFilled = x.domain().map(
+		(weekday: number) =>
+			selectedDataRolledUp?.find((i: [number, number]) => i[0] === weekday)?.at(1) ?? 0
+		)
 	
-	$: selectedDataPath = selectedDataFilled.filter((d: [number, number]) => d[1] > 0).length > 0 ? area(selectedDataFilled) : ""
+	$: selectedDataPath = selectedDataFilled.filter((d: number) => d > 0).length > 0 ? area($selectedDataFilledTweened) : ""
 	
-	$: selectedDataLinePath = line(selectedDataFilled)
+	// $: console.log(area)
+	
+	$: selectedDataLinePath = line($selectedDataFilledTweened)
 	
 	const selectedDataMaxLinePos = (number: number): number => {
 		switch(true) {
@@ -263,7 +256,21 @@
 		}
 	}
 	
+	const selectedDataMaxLinePosTweened: Tweened<Number> = tweened(0, {
+		easing: cubicInOut,
+		duration: 200
+	})
+	
+	$: selectedDataMaxLinePosTweened.set(y(selectedDataMaxLinePos(maxSelectedData)))
+	
 	$: colorScaleSelectedData = createColorScale(colors.get("--colorBackground"), colors.get("--colorAccentPrimary"))
+	
+	const selectedDataFilledTweened = tweened([0, 0, 0, 0, 0, 0, 0], {
+		duration: 200,
+		easing: cubicInOut
+	})
+	
+	$: selectedDataFilledTweened.set(selectedDataFilled.map(y))
 	
 </script>
 
@@ -313,7 +320,6 @@
 		stroke-linecap: round;
 	}
 	
-	
 	svg .infotext {
 		font-size: .5rem;
 		fill: var(--colorTextMutedDark);
@@ -324,18 +330,7 @@
 		fill: var(--colorTextMuted);
 		font-variant-caps: all-small-caps;
 		letter-spacing: .1rem;
-	}
-	.weekday-wrapper:hover .weekday {
-		fill: var(--colorAccentPrimaryMuted);
-	}
-	
-	.weekday-wrapper {
-		cursor: pointer;
-	}
-	
-	.weekday.selected {
-		fill: var(--colorAccentPrimary);
-		font-weight: 500;
+		font-size: .7rem;
 	}
 	
 	svg :global(.weekday-background) {
@@ -360,56 +355,46 @@
 
 <svg bind:this={svg} pointer-events="all" viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet" on:mousemove={handleMouseMove} on:mouseleave={unhover}>
 	
-	<g transform="translate(0 {height + margin.verticalMargin - 70 - 20})">
-		<text class="axis-label horizontal" dy={y(selectedDataMaxLinePos(maxSelectedData)) + 10}>
-			{selectedDataMaxLinePos(maxSelectedData)}
-		</text>
-		{console.log(colors)}
-		<linearGradient id="gradient" x1="0" x2="0" y1="1" y2="0">
-			
-			<stop offset="0%" stop-color={colorScaleSelectedData(0)} />
-			<stop offset="100%" stop-color={colorScaleSelectedData(1)} />
-		</linearGradient>
+	<g transform="translate(0 {height + margin.verticalMargin - 20})">
 		
 		{#if maxSelectedData > 0}
-			<path 
-			class="weekdays-maxline"
-			d="
-				M 0 {y(selectedDataMaxLinePos(maxSelectedData))},	
-				L {width} {y(selectedDataMaxLinePos(maxSelectedData))}
-			"/>
-			<g transform="translate({x.bandwidth() / 2} 0)">
-				<path d={selectedDataPath} fill="url(#gradient)" opacity={.3} />
-				<path d={selectedDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
-			</g>
-		{/if}
-	</g>
-	<g transform="translate(0 {height + margin.verticalMargin - 20})" class="weekdays">
-			<SvgRect 
-				x={$weekdayPosition}
-				xFunc={(rectWidth, _) => rectWidth / -2}
-				class="weekday-select-background"
-				r={1}
-				y={20}
-				height={2}
-				width={40}
-			/>
-		{#each weekdays as weekday, i}
-			<g class="weekday-wrapper" transform="translate({x(i)} 0)">
-				<text dy={1.5} dx={x.bandwidth() / 2} alignment-baseline="hanging" class="weekday"
-			    class:selected={i === weekDayFilter} text-anchor="middle">
-					{weekday}
+		<g transform="translate(0 {-70})">
+			<g transform="translate(0 {$selectedDataMaxLinePosTweened})">
+				<text class="axis-label horizontal" dy={10}>
+					{selectedDataMaxLinePos(maxSelectedData)}
 				</text>
-				<SvgRect 
-					on:click={() => weekDayFilter = i}
-					
-					class="weekday-background"
-					r={5}
-					height={20}
-					width={x.bandwidth()}
-				/>
+				<text class="axis-label horizontal" dy={-5}>
+					Thefts
+				</text>
+				<path 
+				class="weekdays-maxline"
+				d="
+					M 0 {0},	
+					L {width} {0}
+				"/>
 			</g>
-		{/each}
+			<linearGradient id="gradient" x1="0" x2="0" y1="1" y2="0">
+				
+				<stop offset="0%" stop-color={colorScaleSelectedData(0)} />
+				<stop offset="100%" stop-color={colorScaleSelectedData(1)} />
+			</linearGradient>
+			
+				<g transform="translate({x.bandwidth() / 2} 0)">
+					<path d={selectedDataPath} fill="url(#gradient)" opacity={.3} />
+					<path d={selectedDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
+				</g>
+		</g>
+		{/if}
+		<g transform="translate(0 {-20})" class="weekdays">
+			{#each weekdays as weekday, i}
+				<g class="weekday-wrapper" transform="translate({x(i)} 0)">
+					<text dy={1.5} dx={x.bandwidth() / 2} alignment-baseline="hanging" class="weekday"
+			    	class:selected={i === weekDayFilter} text-anchor="middle">
+						{weekday}
+					</text>
+				</g>
+			{/each}
+		</g>
 	</g>
 	
 	<clipPath id="mapClipPath">

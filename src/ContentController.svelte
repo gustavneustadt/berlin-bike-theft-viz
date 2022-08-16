@@ -2,10 +2,11 @@
 	import type { SvelteComponent } from "svelte"
 	import Scrollama from "scrollama"
 	import * as d3 from "d3"
+	import Scrolly from './helper/Scrolly.svelte';
+
 	
 	import Texts from "./Texts.svelte"
 	import Graph from './Graph.svelte'
-	
 	
 	import TotalSum from './graphs/TotalSum.svelte'
 	import HighestDamageMonth from './graphs/HighestDamageMonth.svelte'
@@ -136,28 +137,40 @@
 	let currentStorySectionIndex: number
 
 	
-	const scroller = Scrollama()
+	// const scroller = Scrollama()
 	let progress: number
 	
 	let textElements: HTMLDivElement[][]
 	
 	$: if(textElements) { 
-		scroller
-		.setup({
-			step: textElements.flat(),
-			progress: true
-		})
-		.onStepEnter(response => {
-			const storySectionId = response.element.dataset.storySectionId.split("-")
-			currentStoryTextIndex = Number(storySectionId[1])
-			currentStorySectionIndex = Number(storySectionId[0])
-		})
-		.onStepProgress(response => {
-			progress = response.progress
-			const storySectionId = response.element.dataset.storySectionId.split("-")
-			currentStorySectionIndex = Number(storySectionId[0])
-		})
-		.resize()
+		// scroller
+		// .setup({
+		// 	step: textElements.flat(),
+		// 	progress: true
+		// })
+		// .onStepEnter(response => {
+		// 	const storySectionId = response.element.dataset.storySectionId.split("-")
+		// 	currentStoryTextIndex = Number(storySectionId[1])
+		// 	currentStorySectionIndex = Number(storySectionId[0])
+		// })
+		// .onStepProgress(response => {
+		// 	progress = response.progress
+		// 	const storySectionId = response.element.dataset.storySectionId.split("-")
+		// 	currentStorySectionIndex = Number(storySectionId[0])
+		// })
+		// .resize()
+	}
+	
+	$: {
+		const [storySectionIndex, storyTextIndex] = scrollyData?.storySectionId.split("-").map(Number) ?? [null, null]
+		
+		if(currentStoryTextIndex != storyTextIndex) {
+			currentStoryTextIndex = storyTextIndex
+		}
+		
+		if(currentStorySectionIndex != storySectionIndex) {
+			currentStorySectionIndex = storySectionIndex
+		}
 	}
 	
 	let opacityScale = d3.scaleSqrt()
@@ -169,6 +182,10 @@
 	$: opacityProgress = currentStorySectionTextCount === 1 ? progress : currentStoryTextIndex === 0 ? progress / 2 : currentStoryTextIndex === currentStorySectionTextCount - 1 ? progress / 2 + .5 : .5
 	
 	$: opacity = opacityScale(opacityProgress)
+	
+	let scrollyVal: number
+	let scrollyData: DOMStringMap
+
 </script>
 
 <style>
@@ -189,17 +206,23 @@
 .text-content-wrapper {
 	max-width: 30rem;
 	flex: 1 1 50%;
+	
+	position: relative;
+	padding: 2rem 2rem 0 0;
 }
 </style>
 
 <div class="text-content-wrapper">
-	<Texts bind:textElements={textElements}
-		storySections={storySections} 
-		currentStorySectionIndex={currentStorySectionIndex} 
-		currentStoryTextIndex={currentStoryTextIndex}
-		currentStoryTextProgress={progress}
-	/>
+	<Scrolly bind:value={scrollyVal} bind:data={scrollyData}>
+		
+		<Texts bind:textElements={textElements}
+			storySections={storySections} 
+			currentStorySectionIndex={currentStorySectionIndex} 
+			currentStoryTextIndex={currentStoryTextIndex}
+			currentStoryTextProgress={progress}
+		/>
+	</Scrolly>
 </div>
-<div class="graphs-wrapper" style="opacity: {opacity}%">
+<div class="graphs-wrapper">
 	<Graph component={currentStorySectionGraphComponent} step={currentStoryTextIndex} stepCount={currentStorySectionTextCount}/>
 </div>
