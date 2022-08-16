@@ -360,18 +360,17 @@
 		{#if maxSelectedData > 0}
 		<g transform="translate(0 {-70})">
 			<g transform="translate(0 {$selectedDataMaxLinePosTweened})">
-				<text class="axis-label horizontal" dy={10}>
+				<text class="axis-label horizontal" dy={10} dx={50} text-anchor="end">
 					{selectedDataMaxLinePos(maxSelectedData)}
 				</text>
-				<text class="axis-label horizontal" dy={-5}>
+				<text class="axis-label horizontal" dy={-5} dx={50} text-anchor="end">
 					Thefts
 				</text>
-				<path 
+				<line 
 				class="weekdays-maxline"
-				d="
-					M 0 {0},	
-					L {width} {0}
-				"/>
+				x1={10}
+				x2={width - 60}
+				/>
 			</g>
 			<linearGradient id="gradient" x1="0" x2="0" y1="1" y2="0">
 				

@@ -7,7 +7,6 @@
 	
 	export let currentStorySectionIndex: number
 	export let currentStoryTextIndex: number
-	export let currentStoryTextProgress: number
 
 </script>
 
