@@ -2,8 +2,11 @@
 	import * as d3 from "d3"
 	import { getContext } from "svelte"
 	import { Tweened ,tweened } from "svelte/motion";
+	import { fade, slide, scale } from "svelte/transition"
 	import { cubicOut, cubicInOut } from "svelte/easing";
+	import AxisHelper from '../helper/AxisHelper.svelte'
 	import SvgRect from '../helper/SvgRect.svelte'
+	
 	import SvgLine, { LineEnd } from '../helper/SvgLine.svelte'
 	import Annotation from '../helper/Annotation.svelte'
 	import * as d3annotation from "d3-svg-annotation"
@@ -89,15 +92,10 @@
 		[17, 17] 
 	].slice(0, slicePerStep(step))
 	
+	
 	const slicePerStep = (step: number) => {
-		switch(step) {
-			case 3:
-				return 3
-			case 2:
-				return 2
-			default: 
-				return 1
-		}
+		return step < 4 ? step : 0
+
 	}
 	
 	$: exampleDataSetRecords = exampleDataSet
@@ -273,16 +271,6 @@
 	
 	let axisDrawn: boolean = false
 	
-	$: if(svg && !axisDrawn) {
-		context.select("g.axis .horizontal").append("g").attr("transform", `translate(0, ${height})`).call(axisHorizontal)
-		context.select("g.axis .vertical").append("g").call(axisVertical)
-		axisDrawn = true
-	}
-	
-	$: if(axisDrawn && svg) {
-		context.select("g.axis .vertical g").call(axisVertical)
-	}
-	
 	$: barMargin = 6
 	
 	$: barWidth = x.bandwidth()	
@@ -327,36 +315,50 @@
 			</linearGradient>
 			<SvgRect width={10} height={legendHeight} x={width + 20} y={height / 2 - legendHeight / 2} r={3} class="color-scale" fill="url(#gradient)"/>
 		</g> -->
-		<g class="axis">
-			<g class="vertical"
-				class:hidden={step < 1}>
-			</g>
-			
-			<g class="horizontal">
+		
+		
+			<g class="axis">
+				{#if step > 0}
+					<g transition:fade={{duration: 100}}>
+						<g class="vertical">
+							<AxisHelper axis={axisVertical}/>
+						</g>
+						<text class="axis-label vertical"
+							x={-4}
+							y={-20}
+							text-anchor="end"
+						>
+							Thefts
+						</text>
+					</g>
+				{/if}
+				
+				<g class="horizontal" transform="translate(0 {height})">
+					<AxisHelper axis={axisHorizontal}/>
+				</g>
+				
+				{#key step < 1}
+					<text class="axis-label horizontal"
+						transition:fade={{duration: 100}}
+						x={width / 2}
+						y={step < 1 ? height - 5 : height + 35}
+						text-anchor="middle"
+					>
+						Hours
+					</text>
+				{/key}
 				
 			</g>
-			<text class="axis-label horizontal"
-				x={width / 2}
-				y={step < 1 ? height - 5 : height + 35}
-				text-anchor="middle"
-			>
-				Hours
-			</text>
-			
-			<text class="axis-label vertical"
-				class:hidden={step < 1}
-				x={-4}
-				y={-20}
-				text-anchor="end"
-			>
-				Thefts
-			</text>
-		</g>
-		<g class="bars example" class:hidden={step > lastExampleStep}>
+	
+		
+		<g class="bars example">
 				
 				{#each exampleDataSet as line, i}
 					{#if i === exampleDataSet.length - 1}
-						<g class="example" transform="translate({x(line[0])} 0)">
+
+						<g class="example" transform="translate({x(line[0])} 0)" 
+							transition:fade={{duration: 100}}
+						>
 							<text class="label example"
 								x={(x(line[1]) - x(line[0])) / 2 + barWidth / 2}
 								y={height + 60}
@@ -364,8 +366,14 @@
 							>
 								Theft {exampleTheftNames[i]}
 							</text>
-							<SvgLine x1={0} y1={height + 45} x2={x(line[1]) - x(line[0]) + barWidth} strokeWidth={1} 
-								end={LineEnd.LineOneSide} start={LineEnd.LineOneSide} lineEndHeight={(i === 2 ? -10 : 0) -30}/>
+							<SvgLine 
+							x1={0} 
+							y1={height + 45} 
+							x2={x(line[1]) - x(line[0]) + barWidth} 
+							strokeWidth={1} 
+							end={LineEnd.LineOneSide} 
+							start={LineEnd.LineOneSide} 
+							lineEndHeight={-25}/>
 						</g>
 					{/if}
 				{/each}
@@ -389,34 +397,40 @@
 		/>
 		{/if}
 		
-		<g class="bars" class:hidden={step < 1} opacity={step > lastExampleStep ? $zoomProgress : 1}>
+		{#if step > 0}
+		<g class="bars" transition:fade={{duration: 100}} >
 			{#each stacked as stack, j}
+				{#key stack[1].at(-1)[1][1]}
 				<g
 					transform="translate(0 {height * (1-$tweenedBinHeight)})"
 					opacity={$tweenedBinHeight + .4}
+					in:fade={{delay: 200, duration: 200}}
+					out:fade={{duration: 200}}
 				>
 					<g
 						transform="translate({x(stack[0])} {0}) scale(1 {$tweenedBinHeight})"
 					>
 					
-						<linearGradient id="gradient-{j}" x1="0" x2="0" y1="1" y2="0">
+						<linearGradient id="gradient-{j}-{stack[1].at(-1)[1][1]}" x1="0" x2="0" y1="1" y2="0">
 							{#each stackedPercentages[j] as group, i}
 								<stop offset="{group[1][0] * 100}%" stop-color={colorScale(group[0][0])} />
 								<stop offset="{group[1][1] * 100}%" stop-color={colorScale(group[0][0])} />
 							{/each}
-							</linearGradient>
+						</linearGradient>
+						
 						<SvgRect
 							r={[3, 3, 1, 1]}
 							height={height - y(stack[1].at(-1)[1][1])}
 							yFunc={(_, h) => height - h}
 							width={barWidth}
-							fill="url(#gradient-{j})"
+							fill="url(#gradient-{j}-{stack[1].at(-1)[1][1]})"
 						/>
 					</g>
 					
 				</g>
-
+				{/key}
 			{/each}
 		</g>
+		{/if}
 	</g>
 </svg>
