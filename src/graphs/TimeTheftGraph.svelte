@@ -89,7 +89,7 @@
 	$: exampleDataSet = [
 		[7, 16],
 		[17, 20],
-		[17, 17] 
+		[16, 17] 
 	].slice(0, slicePerStep(step))
 	
 	
@@ -269,9 +269,6 @@
 	$: axisVertical = d3.axisLeft(y).tickFormat(d => verticalAxisFormatter(d)).ticks(5).tickSize(-width).tickPadding(5)
 	$: axisHorizontal = d3.axisBottom(x).tickSize(0).tickPadding(10)
 	
-	let axisDrawn: boolean = false
-	
-	$: barMargin = 6
 	
 	$: barWidth = x.bandwidth()	
 	
