@@ -20,7 +20,6 @@
 
 	const { remap, colorScale, createColorScale, colors } = getContext("colors")
 	
-	$: rollupData = weekDayFilter ? data.filter((d: TheftRecord) => d.dateStart.getDay() === weekDayFilter) : data
 	
 	// $: console.log({rollupData})
 	
@@ -42,8 +41,6 @@
 	const clampNumber = (num: number, a:number, b:number) => Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b))
 	
 	$: maxItem = [...rollup.entries()].find(([key, value]: [number, number]) => value === colorBound[1])
-	
-	$: maxFeature = featureData ? featureData.features.find((d: Feature) => Number(d.properties.PLR_ID) === maxItem[0]) : null
 	
 	
 	$: color = (feature: Feature) => {
@@ -75,10 +72,7 @@
 		return `translate(${mapZoomTransform.x} ${mapZoomTransform.y}) scale(${mapZoomTransform.k})`
 	}
 	
-	let paning = false
-	
 	const handleZoom = (e): void => {
-		paning = true	
 		mapZoomTransform = {
 			k: e.transform.k,
 			x: e.transform.x - margin.horizontalMargin / 2,
@@ -128,8 +122,6 @@
 		maximumFractionDigits: 2,
 	})
 	
-	$: maxFeatureCentroid = maxFeature ? path.centroid(maxFeature) : [0, 0]
-	
 	const handleHovering = (i: number) => {
 		unhover()
 		hovering[i] = true
@@ -142,7 +134,7 @@
 	}
 	
 	const parseRelevantInformationFromFeature = (feature: Feature) => {
-		if(feature === null) {
+		if(!feature) {
 			return null
 		}
 		
@@ -155,12 +147,12 @@
 	}
 	
 	let hoveredFeatureIndex = null
-	$: hoveredFeature = featureData ? featureData.features[hoveredFeatureIndex]: null
-	
 	let selectedFeatureIndex = null
-	$: selectedFeature = selectedFeatureIndex ? featureData.features[selectedFeatureIndex] : maxFeature
+
 	
-	$: showFeature = hoveredFeature ? hoveredFeature : selectedFeature ? selectedFeature : null
+	$: showFeature = featureData?.features.at(showFeatureIndex)
+	$: showFeatureIndex = hoveredFeatureIndex ? hoveredFeatureIndex : selectedFeatureIndex ? selectedFeatureIndex : null
+	
 	$: relevantDataShowFeature = parseRelevantInformationFromFeature(showFeature)
 	
 	const handleSelection = (e) => {
@@ -221,29 +213,67 @@
 		.curve(d3.curveMonotoneX)
 		.x( (_, i) => x(i))
 		.y( d => d)
-
 		
-	$: maxSelectedData = selectedDataRolledUp ? Math.max(...selectedDataRolledUp.map(d => d[1])) : 0
+	$: averageLine = d3.line()
+		.curve(d3.curveMonotoneX)
+		.x( (_, i) => x(i))
+		.y( d => y(d))
+		
+	type WeeklyData = [number, number, number, number, number, number, number]
 	
-	$: selectedData = showFeature ? 
-	data.filter((d: TheftRecord) => d.lor === Number(showFeature.properties.PLR_ID))
-	: null
-	
-	$: selectedDataRolledUp = selectedData ? d3.rollups(selectedData,
-		(g: TheftRecord[]) => g.length,
-		(d: TheftRecord) => d.dateEnd.getDay()
-	) : null
-	
-	$: selectedDataFilled = x.domain().map(
-		(weekday: number) =>
-			selectedDataRolledUp?.find((i: [number, number]) => i[0] === weekday)?.at(1) ?? 0
+	const getWeeklyDataOfMapFeature = 
+		(feature: Feature): WeeklyData => {
+		
+		if(!feature) {
+			return [0, 0, 0, 0, 0, 0, 0]
+		}
+		
+		const selectedData = data.filter((d: TheftRecord) => d.lor === Number(feature?.properties.PLR_ID ?? 0))
+		
+		const rolledUp =  d3.rollups(selectedData,
+			(g: TheftRecord[]) => g.length,
+			(d: TheftRecord) => d.dateEnd.getDay()
 		)
+		
+		const selectedDataFilled: WeeklyData = x.domain().map(
+		(weekday: number) =>
+			rolledUp?.find((i: [number, number]) => i[0] === weekday)?.at(1) ?? 0
+		)
+		
+		return selectedDataFilled
+	}
 	
+	
+	$: maxSelectedData = Math.max(...selectedDataFilled)
+	
+	$: selectedDataFilled = getWeeklyDataOfMapFeature(showFeature)
+
 	$: selectedDataPath = selectedDataFilled.filter((d: number) => d > 0).length > 0 ? area($selectedDataFilledTweened) : ""
+	
 	
 	// $: console.log(area)
 	
 	$: selectedDataLinePath = line($selectedDataFilledTweened)
+	$: averageDataLinePath = averageLine(averageWeeklyData ?? [0])
+	
+	let averageWeeklyData: WeeklyData
+	
+	$: console.log(averageWeeklyData)
+	
+	$: selectedDataIsSet = selectedDataFilled.filter(n => n > 0).length > 0
+	
+	$: {
+		if(selectedDataIsSet) {
+			setTimeout(() => {
+				
+				const weeklyData: WeeklyData[] = featureData?.features.map(getWeeklyDataOfMapFeature) ?? []
+				averageWeeklyData = weeklyData?.reduce((acc: WeeklyData, curr: WeeklyData) => {
+					return curr.map((val: number, i: number) => acc[i] + val)
+				}, [0, 0, 0, 0, 0, 0, 0]).map(x => x / weeklyData.length) as WeeklyData ?? null
+			}, 300)
+		}
+	}
+
 	
 	const selectedDataMaxLinePos = (number: number): number => {
 		switch(true) {
@@ -381,6 +411,8 @@
 				<g transform="translate({x.bandwidth() / 2} 0)">
 					<path d={selectedDataPath} fill="url(#gradient)" opacity={.3} />
 					<path d={selectedDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
+						
+					<path d={averageDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
 				</g>
 		</g>
 		{/if}
