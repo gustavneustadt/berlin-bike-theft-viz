@@ -3,8 +3,10 @@
 	import { onMount, getContext } from "svelte"
 	import { Tweened, tweened } from "svelte/motion";
 	import { cubicInOut } from "svelte/easing";
+	import { fade } from "svelte/transition";
 	import type { FeatureCollection, Feature } from "geojson"
-	import SvgRect from './../helper/SvgRect.svelte'
+	// import SvgRect from './../helper/SvgRect.svelte'
+	import TweenHelper from './../helper/TweenHelper.svelte'
 
 	let svg
 	export let data: TheftRecord[]
@@ -199,22 +201,18 @@
 		.range([50, width - 50])
 		.paddingOuter(-.25)
 	
-	$: y = d3.scaleLinear()
-		.domain([maxSelectedData, 0])
+	const y = d3.scalePow()
+		.exponent(2)
+		.domain([1, 0])
 		.range([0, 40])
 	
 	$: area = d3.area()
 		.curve(d3.curveMonotoneX)
 		.x( (_, i) => x(i))
-		.y1( d => d)
+		.y1( d => y(d))
 		.y0(y(0))
 	
 	$: line = d3.line()
-		.curve(d3.curveMonotoneX)
-		.x( (_, i) => x(i))
-		.y( d => d)
-		
-	$: averageLine = d3.line()
 		.curve(d3.curveMonotoneX)
 		.x( (_, i) => x(i))
 		.y( d => y(d))
@@ -254,11 +252,13 @@
 	// $: console.log(area)
 	
 	$: selectedDataLinePath = line($selectedDataFilledTweened)
-	$: averageDataLinePath = averageLine(averageWeeklyData ?? [0])
+	
+	$: averageWeeklyMax = Math.max(...(averageWeeklyData ?? [0]))
+	$: averageDataLinePath = area(
+		averageWeeklyData?.map((x: number) => averageWeeklyMax === 0 ? 0 : x / averageWeeklyMax) ?? [0, 0, 0, 0, 0, 0, 0]
+	)
 	
 	let averageWeeklyData: WeeklyData
-	
-	$: console.log(averageWeeklyData)
 	
 	$: selectedDataIsSet = selectedDataFilled.filter(n => n > 0).length > 0
 	
@@ -267,41 +267,32 @@
 			setTimeout(() => {
 				
 				const weeklyData: WeeklyData[] = featureData?.features.map(getWeeklyDataOfMapFeature) ?? []
-				averageWeeklyData = weeklyData?.reduce((acc: WeeklyData, curr: WeeklyData) => {
-					return curr.map((val: number, i: number) => acc[i] + val)
-				}, [0, 0, 0, 0, 0, 0, 0]).map(x => x / weeklyData.length) as WeeklyData ?? null
+				averageWeeklyData = weeklyData?.reduce((acc: number[][], curr: WeeklyData) => {
+					
+
+					curr.forEach((val: number, i: number) => {
+						acc[i].push(val)
+					})
+					
+					return acc
+				}, [[], [], [], [], [], [], []]).map((d: number[]) => {
+					return d3.median(d)
+				}) as WeeklyData ?? null
 			}, 300)
 		}
 	}
 
-	
-	const selectedDataMaxLinePos = (number: number): number => {
-		switch(true) {
-			case (number < 5): 
-				return number
-			case (number < 10):
-				return Math.floor(number / 2) * 2
-			default:
-				return Math.floor(number / 10) * 10
-		}
-	}
-	
-	const selectedDataMaxLinePosTweened: Tweened<Number> = tweened(0, {
-		easing: cubicInOut,
-		duration: 200
-	})
-	
-	$: selectedDataMaxLinePosTweened.set(y(selectedDataMaxLinePos(maxSelectedData)))
+
 	
 	$: colorScaleSelectedData = createColorScale(colors.get("--colorBackground"), colors.get("--colorAccentPrimary"))
 	
-	const selectedDataFilledTweened = tweened([0, 0, 0, 0, 0, 0, 0], {
+	const selectedDataFilledTweened: Tweened<WeeklyData> = tweened([0, 0, 0, 0, 0, 0, 0], {
 		duration: 200,
 		easing: cubicInOut
 	})
 	
-	$: selectedDataFilledTweened.set(selectedDataFilled.map(y))
-	
+	$: selectedDataFilledTweened.set(selectedDataFilled.map((x: number) => maxSelectedData === 0 ? 0 : x / maxSelectedData) as WeeklyData)
+
 </script>
 
 <style>
@@ -389,42 +380,56 @@
 		
 		{#if maxSelectedData > 0}
 		<g transform="translate(0 {-70})">
-			<g transform="translate(0 {$selectedDataMaxLinePosTweened})">
-				<text class="axis-label horizontal" dy={10} dx={50} text-anchor="end">
-					{selectedDataMaxLinePos(maxSelectedData)}
-				</text>
-				<text class="axis-label horizontal" dy={-5} dx={50} text-anchor="end">
-					Thefts
-				</text>
-				<line 
-				class="weekdays-maxline"
-				x1={10}
-				x2={width - 60}
-				/>
-			</g>
 			<linearGradient id="gradient" x1="0" x2="0" y1="1" y2="0">
 				
 				<stop offset="0%" stop-color={colorScaleSelectedData(0)} />
 				<stop offset="100%" stop-color={colorScaleSelectedData(1)} />
 			</linearGradient>
 			
+			<linearGradient id="gradient-average" x1="0" x2="0" y1="1" y2="0">
+				
+				<stop offset="20%" stop-color="white" stop-opacity="0%"/>
+				<stop offset="100%" stop-color="white" />
+			</linearGradient>
+			
 				<g transform="translate({x.bandwidth() / 2} 0)">
+					{#if averageWeeklyMax > 0}
+						<g transition:fade={{duration:400, delay: 500}} >
+							<path d={averageDataLinePath} fill="url(#gradient-average)" opacity={.1} />
+							<g transform="translate({x.bandwidth() * 6.75} {y(averageWeeklyData.at(-1) / averageWeeklyMax)})">
+								<text 
+									alignment-baseline="middle" 
+									class="weekday"
+									text-anchor="start"
+									opacity={.3}
+								>
+									median
+								</text>
+								
+							</g>
+						</g>
+					{/if}
 					<path d={selectedDataPath} fill="url(#gradient)" opacity={.3} />
-					<path d={selectedDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
 						
-					<path d={averageDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
+					<path d={selectedDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
 				</g>
 		</g>
 		{/if}
 		<g transform="translate(0 {-20})" class="weekdays">
 			{#each weekdays as weekday, i}
 				<g class="weekday-wrapper" transform="translate({x(i)} 0)">
-					<text dy={1.5} dx={x.bandwidth() / 2} alignment-baseline="hanging" class="weekday"
-			    	class:selected={i === weekDayFilter} text-anchor="middle">
+					<text dy={1.5} dx={x.bandwidth() / 2} alignment-baseline="hanging" class="weekday" text-anchor="middle">
 						{weekday}
 					</text>
 				</g>
 			{/each}
+			<text class="axis-label horizontal"
+				dy={30}
+				dx={width / 2}
+				text-anchor="middle"
+			>
+				Weekday Distribution
+			</text>
 		</g>
 	</g>
 	
@@ -456,15 +461,14 @@
 				<g transform="translate(10, 0)">
 					<text class="annotation-note-label number" text-anchor="end" dy={20} dx={-5}>
 						<tspan>
-							{relevantDataShowFeature.thefts} Thefts
+							<TweenHelper value={relevantDataShowFeature.thefts}/> Thefts
 						</tspan>
 					</text>
 					<text class="annotation-note-label percent" text-anchor="start" dy={20} dx={5}>
 						<tspan>
-							{relevantDataShowFeature.percentage} %
+							<TweenHelper value={relevantDataShowFeature.percentage} options={{maximumFractionDigits: 2, minimumFractionDigits: 2}} /> %
 						</tspan>
 					</text>
-					
 				</g>
 				<g class="annotation-connector">
 					<path d="M 0 -15, 
@@ -483,14 +487,9 @@
 	>
 		Berlin
 	</text>
-	{#if mapZoomTransform.k >= 1.2}
-		<text class="infotext" x={width / 2} y={6} text-anchor="middle" transform="">
-			Show all
-		</text>
-	{/if}
 	{#if mapZoomTransform.k < 1.2}
 		<text class="infotext" x={width / 2} y={6} text-anchor="middle" transform="">
-			Hold ⌥ Option or Alt and Scroll to Zoom
+			Hold ⌥ Option or Alt and Scroll to Zoom or Pan
 		</text>
 	{/if}
 </svg>
