@@ -25,7 +25,7 @@ out:fade={{duration: fadeDuration, easing: cubicInOut}}>
 		/* position: sticky; */
 		position: absolute;
 		width: 100%;
-		max-height: 100%;
+		max-height: 100vh;
 	}
 	
 	.graph :global(.axis g .domain) {
@@ -44,6 +44,7 @@ out:fade={{duration: fadeDuration, easing: cubicInOut}}>
 	.graph :global(svg) {
 		width: 100%;
 		height: 100%;
+		max-height: 100vh;
 	}
 	.graph :global(.bin) {
 		fill: var(--color);
