@@ -201,8 +201,8 @@
 		.range([50, width - 50])
 		.paddingOuter(-.25)
 	
-	const y = d3.scalePow()
-		.exponent(2)
+	const y = d3.scaleLinear()
+		// .exponent(1)
 		.domain([1, 0])
 		.range([0, 40])
 	
@@ -362,15 +362,15 @@
 	svg :global(.weekday-select-background) {
 		fill: var(--colorAccentPrimary);
 	}
-	.weekdays-maxline {
-		stroke: var(--colorAccentPrimaryMuted);
-		stroke-width: .5;
-		opacity: .3;
-	}
 	.dataline {
 		stroke: var(--colorAccentPrimaryMuted);
 		stroke-width: 2;
 		
+	}
+	.zero-line {
+		stroke: var(--colorAccentPrimaryMuted);
+		stroke-width: .5;
+		opacity: .3;
 	}
 </style>
 
@@ -418,18 +418,26 @@
 		<g transform="translate(0 {-20})" class="weekdays">
 			{#each weekdays as weekday, i}
 				<g class="weekday-wrapper" transform="translate({x(i)} 0)">
-					<text dy={1.5} dx={x.bandwidth() / 2} alignment-baseline="hanging" class="weekday" text-anchor="middle">
+					<text dy={3} dx={x.bandwidth() / 2} class="weekday" text-anchor="middle">
 						{weekday}
 					</text>
 				</g>
 			{/each}
 			<text class="axis-label horizontal"
-				dy={30}
+				dy={20}
 				dx={width / 2}
 				text-anchor="middle"
 			>
 				Weekday Distribution
 			</text>
+			<line 
+				class="zero-line"
+				y1={-8}
+				y2={-8}
+				x1={50}
+				x2={width - 50}
+			/>
+			
 		</g>
 	</g>
 	
@@ -453,11 +461,13 @@
 		{#if featureData}
 			{#if showFeature}
 			<g transform="translate({width / 2} {margin.top + height + 18})" class="annotation-bottom">
-				<text class="annotation-note-title" text-anchor="middle">
+				{#key relevantDataShowFeature.name}
+				<text class="annotation-note-title" text-anchor="middle" in:fade={{delay: 50, duration:50}} out:fade={{duration: 50}}>
 					<tspan>
 						{relevantDataShowFeature.name}
 					</tspan>
 				</text>
+				{/key}
 				<g transform="translate(10, 0)">
 					<text class="annotation-note-label number" text-anchor="end" dy={20} dx={-5}>
 						<tspan>
