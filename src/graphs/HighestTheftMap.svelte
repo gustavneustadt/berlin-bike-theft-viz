@@ -114,16 +114,6 @@
 		context.call(zoom) 
 	}
 	
-	const numberFormatter = Intl.NumberFormat("fr", {
-		
-	})
-	
-	const percentFormatter = Intl.NumberFormat("en", {
-		minimumIntegerDigits: 1,
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
-	
 	const handleHovering = (i: number) => {
 		unhover()
 		hovering[i] = true
@@ -141,9 +131,9 @@
 		}
 		
 		return {
-			percentage: percentFormatter.format((rollup.get(Number(feature.properties.PLR_ID)) ?? 0) / sum * 100),
+			percentage: Number((rollup.get(Number(feature.properties.PLR_ID)) ?? 0)) / sum * 100,
 			name: feature.properties.PLR_NAME,
-			thefts: numberFormatter.format(rollup.get(Number(feature.properties.PLR_ID)) ?? 0),
+			thefts: Number(rollup.get(Number(feature.properties.PLR_ID))) ?? 0,
 			centroid: path.centroid(feature)
 		}
 	}
@@ -257,6 +247,9 @@
 	$: averageDataLinePath = area(
 		averageWeeklyData?.map((x: number) => averageWeeklyMax === 0 ? 0 : x / averageWeeklyMax) ?? [0, 0, 0, 0, 0, 0, 0]
 	)
+	$: averageDataLine = line(
+		averageWeeklyData?.map((x: number) => averageWeeklyMax === 0 ? 0 : x / averageWeeklyMax) ?? [0, 0, 0, 0, 0, 0, 0]
+	)
 	
 	let averageWeeklyData: WeeklyData
 	
@@ -284,7 +277,7 @@
 
 
 	
-	$: colorScaleSelectedData = createColorScale(colors.get("--colorBackground"), colors.get("--colorAccentPrimary"))
+	$: colorScaleSelectedData = createColorScale(colors.get("--colorTextDark"), colors.get("--colorAccentPrimary"))
 	
 	const selectedDataFilledTweened: Tweened<WeeklyData> = tweened([0, 0, 0, 0, 0, 0, 0], {
 		duration: 200,
@@ -304,8 +297,12 @@
 		text-anchor: middle;
 	}
 	
+	svg .bin {
+		/* filter: drop-shadow(0px 1rem 0px rgba(0, 0, 0, 1)); */
+	}
+	
 	svg {
-		/* filter: drop-shadow(0px 2px 0px rgba(0, 0, 0, .2)); */
+		/* filter: drop-shadow(0px 2px 0px rgba(0, 0, 0, 1)); */
 	}
 	
 	/* svg :global(.annotation-note-label.number tspan) {
@@ -364,7 +361,7 @@
 	}
 	.dataline {
 		stroke: var(--colorAccentPrimaryMuted);
-		stroke-width: 2;
+		stroke-width: 1;
 		
 	}
 	.zero-line {
@@ -392,10 +389,14 @@
 				<stop offset="100%" stop-color="white" />
 			</linearGradient>
 			
-				<g transform="translate({x.bandwidth() / 2} 0)">
+				<g transform="translate({x.bandwidth() / 2} 1)">
 					{#if averageWeeklyMax > 0}
 						<g transition:fade={{duration:400, delay: 500}} >
 							<path d={averageDataLinePath} fill="url(#gradient-average)" opacity={.1} />
+							<path d={averageDataLine} class="dataline" fill="none" opacity={.1} />
+							
+								
+								
 							<g transform="translate({x.bandwidth() * 6.75} {y(averageWeeklyData.at(-1) / averageWeeklyMax)})">
 								<text 
 									alignment-baseline="middle" 
