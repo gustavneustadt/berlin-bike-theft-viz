@@ -2,6 +2,7 @@
 	import * as d3 from "d3"
 	import { Tweened, tweened } from "svelte/motion"
 	import { cubicOut } from "svelte/easing"
+	import TweenHelper from './../helper/TweenHelper.svelte'
 	import NumberStatement from './NumberStatement.svelte'
 	export let data: TheftRecord[]
 	
@@ -20,46 +21,53 @@
 		}, [0, 0])
 	)
 	
-	$: tweenedValues.set(rollup)
-
+	$: damageAmount = rollup[0] ?? 0
+	$: theftAmount = rollup[1] ?? 0
 	
+	const damageAmountFormatter = new Intl.NumberFormat("fr", {
+		useGrouping: true,
+		maximumFractionDigits: 0,
+		maximumSignificantDigits: 4
+	})
 	
-	const damageAmountString = (number: number = null) => {
-		return new Intl.NumberFormat("en", {
-			useGrouping: true,
-			maximumFractionDigits: 2,
-			minimumFractionDigits: 2
-		}).format((number ? number : rollup[0]) / 1000000) + " mil"
-	}
-	
-	$: bikesAmountString = new Intl.NumberFormat("fr", {
+	const bikesAmountFormatter = new Intl.NumberFormat("fr", {
 		useGrouping: true,
 		maximumFractionDigits: 0
-	}).format($tweenedValues[1])
+	})
 	
 	$: date = new Intl.DateTimeFormat("en-EN", {
 		month: "long",
 		year: "numeric"
 	}).format(d3.min(data, (d: TheftRecord) => d.dateStart))
 	
-	function largestNumber(num) {
-		num = String(num).split('').sort().reverse().join('');
-		return Number(num);
-	}
 </script>
-
-<style>
-
-</style>
 
 <NumberStatement
 	smallTitle="Total Damage"
 	subline="since {date}"
+	unit="euro"
+	comment={damageAmount > 1000000 ? "Yeah, thats Million." : null}
 >
-	{damageAmountString($tweenedValues[0])} <span>EUR</span>
+	<TweenHelper 
+		value={damageAmount} 
+		startValue={damageAmount * .8} 
+		tweenOptions={{duration: 700, easing: cubicOut}} 
+		options={{
+			maximumFractionDigits: 0,
+			maximumSignificantDigits: 4
+		}}
+	/>
 </NumberStatement>
 <NumberStatement
-	secondary
+	unit="thefts"
 >
-	{bikesAmountString} <span>thefts</span>
+	<TweenHelper 
+		value={theftAmount} 
+		startValue={theftAmount * .8} 
+		tweenOptions={{duration: 700, easing: cubicOut}} 
+		options={{
+			maximumFractionDigits: 0,
+		}}
+	/>
+	
 </NumberStatement>

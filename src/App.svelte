@@ -26,7 +26,8 @@ setContext("colors", {
 			"--colorScalePrimary",
 			"--colorScaleSecondary",
 			"--colorAccentPrimary",
-			"--colorBackground"
+			"--colorBackground",
+			"--colorTextDark"
 		]
 		const computed = getComputedStyle(element)
 		const styleMap: Map<string, Color> = new Map()
@@ -113,8 +114,6 @@ $: if(videoElement) { videoElement.play() }
 <style>
 
 main {
-	display: flex;
-	max-width: 80vw;
 	margin: 0 auto;
 	position: relative;
 }

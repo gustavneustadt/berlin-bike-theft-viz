@@ -1,15 +1,11 @@
 <script lang="ts">
 	import * as d3 from "d3"
-	import { Tweened, tweened } from "svelte/motion"
+	import TweenHelper from './../helper/TweenHelper.svelte'
 	import { cubicOut } from "svelte/easing"
 	import NumberStatement from './NumberStatement.svelte'
 	
 	export let data: TheftRecord[]
-	
-	$: tweenedValues = tweened(filteredGroup[1].map((d: number) => d / 1.5), {
-		duration: 1000,
-		easing: cubicOut
-	})
+
 	
 	$: rollup = d3.rollups(
 		data,
@@ -28,28 +24,14 @@
 
 	$: todayIsInFilteredGroupWeekRange = Date.now() > weeksRange[0] && Date.now() < weeksRange[1]
 	
-	$: tweenedValues.set(filteredGroup[1])
-	
-	const damageAmountString = (number: number = null) => {
-		return "~" + new Intl.NumberFormat("fr", {
-			useGrouping: true,
-			maximumFractionDigits: 0,
-			maximumSignificantDigits: 3
-		}).format((number ? number : filteredGroup[1][0]))
-	}
-	
-	$: bikesAmountString = new Intl.NumberFormat("en", {
-		useGrouping: true,
-		maximumFractionDigits: 0
-	}).format($tweenedValues[1])
-	
 	$: currentWeekDate = new Intl.DateTimeFormat("en", {
 		weekday: "long",
 		day: "numeric",
 		month: "long"
 	}).format(weeksRange[0])
 	
-	
+	$: damageAmount = filteredGroup[1][0]
+	$: theftAmount = filteredGroup[1][1]
 </script>
 
 <style>
@@ -59,10 +41,14 @@
 <NumberStatement
  smallTitle="{todayIsInFilteredGroupWeekRange ? "Current Week": "Last Week"} Damage"
  subline="from {currentWeekDate}"
- bigNumberExpanderText={damageAmountString()}
+ unit="euro"
 >
-	{damageAmountString($tweenedValues[0])} <span>EUR</span>
+	<TweenHelper value={damageAmount} tweenOptions={{duration: 500, easing: cubicOut}} startValue={damageAmount * .8} 
+	options={{
+		maximumFractionDigits: 0,
+		maximumSignificantDigits: 3
+	}}/>
 </NumberStatement>
-<NumberStatement secondary>
-	{bikesAmountString} <span>bikes</span>
+<NumberStatement unit="thefts">
+	<TweenHelper value={theftAmount} tweenOptions={{duration: 500, easing: cubicOut}} startValue={theftAmount * .8} options={{maximumFractionDigits: 0}}/>
 </NumberStatement>

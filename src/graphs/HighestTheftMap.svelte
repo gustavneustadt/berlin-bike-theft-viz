@@ -462,7 +462,7 @@
 			{#if showFeature}
 			<g transform="translate({width / 2} {margin.top + height + 18})" class="annotation-bottom">
 				{#key relevantDataShowFeature.name}
-				<text class="annotation-note-title" text-anchor="middle" in:fade={{delay: 50, duration:50}} out:fade={{duration: 50}}>
+				<text class="annotation-note-title" text-anchor="middle">
 					<tspan>
 						{relevantDataShowFeature.name}
 					</tspan>
@@ -476,7 +476,7 @@
 					</text>
 					<text class="annotation-note-label percent" text-anchor="start" dy={20} dx={5}>
 						<tspan>
-							<TweenHelper value={relevantDataShowFeature.percentage} options={{maximumFractionDigits: 2, minimumFractionDigits: 2}} /> %
+							<TweenHelper value={relevantDataShowFeature.percentage} locale="en" options={{maximumFractionDigits: 2, minimumFractionDigits: 2}} /> %
 						</tspan>
 					</text>
 				</g>

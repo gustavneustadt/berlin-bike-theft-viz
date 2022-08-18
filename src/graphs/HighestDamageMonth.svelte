@@ -1,14 +1,11 @@
 <script lang="ts">
 	import * as d3 from "d3"
-	import { Tweened, tweened } from "svelte/motion"
 	import { cubicOut } from "svelte/easing"
 	import NumberStatement from './NumberStatement.svelte'
+	import TweenHelper from './../helper/TweenHelper.svelte'
+	
 	export let data: TheftRecord[]
 	
-	$: tweenedValues = tweened(highestMonth[1].map((d: number) => d/1.5), {
-		duration: 1000,
-		easing: cubicOut
-	})
 
 	$: rollup = d3.rollups(
 		data,
@@ -24,20 +21,10 @@
 	
 	$: highestMonth = rollup.at(d3.maxIndex(rollup, (d: [Date, [number, number]]) => d[1][0]))
 	
-	$: tweenedValues.set(highestMonth[1])
 	
-	const damageAmountString = (number: number = null) => {
-		return new Intl.NumberFormat("en", {
-			useGrouping: true,
-			maximumFractionDigits: 2,
-			minimumFractionDigits: 2
-		}).format((number ? number : highestMonth[1][0]) / 1000000) + " mil"
-	}
-	
-	$: bikesAmountString = new Intl.NumberFormat("fr", {
-		useGrouping: true,
-		maximumFractionDigits: 0
-	}).format($tweenedValues[1])
+	$: damageAmount = highestMonth[1][0]
+	$: theftAmount = highestMonth[1][1]
+
 	
 	$: month = new Intl.DateTimeFormat("en-EN", {
 		month: "long",
@@ -53,10 +40,15 @@
 <NumberStatement
  smallTitle="Highest Damage Month"
  subline={month}
+ unit="euro"
 >
-	{damageAmountString($tweenedValues[0])} <span>EUR</span>
+	<TweenHelper value={damageAmount} tweenOptions={{duration: 500, easing: cubicOut}} startValue={damageAmount * .8} options={{
+		maximumFractionDigits: 0,
+		maximumSignificantDigits: 3
+	}}/>
 </NumberStatement>
 <NumberStatement 
-secondary>
-	{bikesAmountString} <span>bikes</span>
+unit="thefts"
+>
+	<TweenHelper value={theftAmount} tweenOptions={{duration: 500, easing: cubicOut}} startValue={theftAmount * .8} options={{maximumFractionDigits: 0}}/>
 </NumberStatement>
