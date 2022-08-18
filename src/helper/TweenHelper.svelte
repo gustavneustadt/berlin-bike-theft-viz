@@ -5,6 +5,7 @@
 	export let options: Intl.NumberFormatOptions = null
 	export let locale: string | string[] = null
 	export let formatter: Intl.NumberFormat = null
+	export let startValue: number = null
 	
 	interface TweenOptions<T> {
 		delay?: number;
@@ -14,24 +15,24 @@
 	}
 	
 	export let tweenOptions: TweenOptions<number> = null
-	export let value: string = "0"
+	export let value: number = 0
 	
 	$: if(tween === null) {
-		tween = tween ?? tweened(valueNumber, tweenOptions ?? {
+		tween = tween ?? tweened(startValue ?? value, tweenOptions ?? {
 			duration: 200,
 			easing: cubicInOut
 		})
-	} else {
-		tween.set(valueNumber)
 	}
 	
+	$: tween.set(valueNumber)
+	
 	$: if(!formatter) {
-		formatter = new Intl.NumberFormat(locale ?? "en", options ?? {
+		formatter = new Intl.NumberFormat(locale ?? "fr", options ?? {
 			maximumFractionDigits: 0
 		})
 	}
 	
-	$: valueNumber = Number(value ?? 0) ?? 0
+	$: valueNumber = value ?? 0
 
 </script>
 
