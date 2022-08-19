@@ -97,4 +97,10 @@ out:fade={{duration: fadeDuration, easing: cubicInOut}}>
 		letter-spacing: .1em;
 		font-size: .7rem;
 	}
+	
+	.graph :global(path.dataline) {
+		stroke: var(--colorAccentPrimaryMuted);
+		stroke-width: 1;
+		fill: none;	
+	}
 </style>

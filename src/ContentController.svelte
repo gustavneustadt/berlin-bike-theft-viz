@@ -15,9 +15,26 @@
 	import BikeValueGraph from './graphs/BikeValueGraph.svelte'
 	import TimeTheftGraph from './graphs/TimeTheftGraph.svelte'
 	import HighestTheftMap from './graphs/HighestTheftMap.svelte'
+	import AnnualDistribution from './graphs/AnnualDistribution.svelte'
 
 	
 	const storySections: StorySection[] = [
+		{
+			title: "Bike Theft in Berlin",
+			component: TotalSum,
+			texts: [{
+				text: ""
+			}]
+		},
+		{
+			title: "Annual Distribution",
+			component: AnnualDistribution,
+			texts: [
+				{
+					text: "Thats a very interesting graph. WOW!"
+				}
+			]
+		},
 		{
 			title: "When do theft happen?",
 			texts: [
@@ -158,6 +175,7 @@
 	let scrollyVal: number
 	let scrollyData: DOMStringMap
 
+	$: gradientIdentifikatior = Math
 
 </script>
 
@@ -177,24 +195,46 @@
 	padding: 1rem;
 }
 .text-content-wrapper {
-	max-width: 30rem;
-	flex: 1 1 50%;
+	/* width: var(--body-width); */
+	flex: 1 0 var(--body-width);
 	
 	position: relative;
 	padding: 2rem 2rem 0 0;
 }
-</style>
+.content-wrapper {
+	--padding: 2rem;
+	display: flex;
+	margin: 0 auto;
+	padding: var(--padding);
+}
+.text-content-wrapper {
+	width: calc(100vw - 2.25rem);
+}
+@media (min-width: 34.375rem) {
+	.text-content-wrapper {
+		width: min(calc(20.625rem + 33vw), 31rem);
+	}
+}
+@media (min-width: 62.5rem) {
+	.text-content-wrapper {
+		width: 31rem;
+	}
+}
 
-<div class="text-content-wrapper">
-	<Scrolly bind:value={scrollyVal} bind:data={scrollyData}>
-		
-		<Texts bind:textElements={textElements}
-			storySections={storySections} 
-			currentStorySectionIndex={currentStorySectionIndex} 
-			currentStoryTextIndex={currentStoryTextIndex}
-		/>
-	</Scrolly>
-</div>
-<div class="graphs-wrapper">
-	<Graph component={currentStorySectionGraphComponent} step={currentStoryTextIndex} stepCount={currentStorySectionTextCount}/>
+
+</style>
+<div class="content-wrapper">
+	<div class="text-content-wrapper">
+		<Scrolly bind:value={scrollyVal} bind:data={scrollyData}>
+			
+			<Texts bind:textElements={textElements}
+				storySections={storySections} 
+				currentStorySectionIndex={currentStorySectionIndex} 
+				currentStoryTextIndex={currentStoryTextIndex}
+			/>
+		</Scrolly>
+	</div>
+	<div class="graphs-wrapper">
+		<Graph component={currentStorySectionGraphComponent} step={currentStoryTextIndex} stepCount={currentStorySectionTextCount}/>
+	</div>
 </div>
