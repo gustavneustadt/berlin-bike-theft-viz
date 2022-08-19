@@ -29,6 +29,12 @@
 		position: relative;
 		text-shadow: 0 .05rem 0px black;
 	}
+	.text {
+		position: absolute;
+		top: -4rem;
+		width: 200%;
+		text-align: right;
+	}
 	.big-number {
 		display: flex;
 		flex-direction: column;
@@ -46,11 +52,11 @@
 		box-shadow: 0 .5rem var(--colorTextDark);
 		text-align: right;
 		position: relative;
-		overflow: hidden;
 	}
 	
 	.big-number.secondary {
 		border-color: var(--colorTextDarkMuted);
+		box-shadow: 0 .5rem var(--colorTextDarkMuted);
 		background: var(--colorBackground);
 		color: var(--colorTextPrimary);
 		font-weight: 600;
@@ -60,6 +66,7 @@
 	}
 	
 	.subline {
+		position: relative;
 		font-size: 1.1rem;
 		/* font-variant-numeric: tabular-nums; */
 		/* text-transform: uppercase; */
@@ -71,6 +78,7 @@
 		align-items: flex-end;
 		flex-direction: column;
 		gap: 1.8rem;
+		position: relative;
 	}
 	.wrapper:not(:first-of-type) {
 		margin: .8rem 0 0;
@@ -89,18 +97,24 @@
 	.unit {
 		font-variant-caps: all-small-caps;
 		font-weight: normal;
-		font-size: 3rem;
-		letter-spacing: .1rem;
+		font-size: .6em;
+		letter-spacing: .02em;
 		color: var(--colorTextMutedDark);
 	}
 	.comment {
-		color: var(--colorTextMuted);
+		color: var(--colorTextDarkMuted);
 		font-size: 1rem;
 		position: absolute;
 		left: 1.5rem;
 		bottom: .9rem;
 		font-style: italic;
 		font-weight: normal;
+	}
+	
+	@media (max-width: 66.25rem) {
+		.big-number {
+			font-size: 2.4rem;
+		}
 	}
 </style>
 

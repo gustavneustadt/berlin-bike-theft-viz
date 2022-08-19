@@ -44,7 +44,6 @@
 	
 	$: maxItem = [...rollup.entries()].find(([key, value]: [number, number]) => value === colorBound[1])
 	
-	
 	$: color = (feature: Feature) => {
 		const number = rollup.get(Number(feature.properties.PLR_ID))
 		if(!number) {
@@ -140,10 +139,12 @@
 	
 	let hoveredFeatureIndex = null
 	let selectedFeatureIndex = null
-
 	
-	$: showFeature = featureData?.features.at(showFeatureIndex)
-	$: showFeatureIndex = hoveredFeatureIndex ? hoveredFeatureIndex : selectedFeatureIndex ? selectedFeatureIndex : null
+	$: showFeature = showFeatureIndex ? featureData?.features.at(showFeatureIndex) : featureData?.features.find((d: Feature) => Number(d.properties.PLR_ID) === maxItem.at(0))
+	$: showFeatureIndex = hoveredFeatureIndex ?? selectedFeatureIndex
+	
+	
+	$: console.log(maxItem, featureData?.features)
 	
 	$: relevantDataShowFeature = parseRelevantInformationFromFeature(showFeature)
 	
@@ -230,16 +231,55 @@
 		
 		return selectedDataFilled
 	}
+	type HourlyData = [
+		number, number, number, 
+		number, number, number, 
+		number, number, number,
+		number, number, number,
+		number, number, number,
+		number, number, number,
+		number, number, number,
+		number, number, number,
+	]
 	
+	const getEmptyHourlyData = (): HourlyData => {
+		return [
+			0, 0, 0, 
+			0, 0, 0, 
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+		]
+	}
+	
+	const getHourlyDataOfMapFeature = 
+	(feature: Feature): HourlyData => {
+		
+		if(!feature) {
+			return getEmptyHourlyData()
+		}
+		
+		const selectedData = data.filter((d: TheftRecord) => d.lor === Number(feature?.properties.PLR_ID ?? 0))
+		
+		const dateRanges = selectedData.reduce((acc: HourlyData, i: TheftRecord) => {
+			i.dateRange.forEach((j: TheftRecordProbItem) => {
+					acc[j.date.getHours()] += j.probScore
+			})
+			
+			return acc
+		}, getEmptyHourlyData())
+		
+		return dateRanges
+	}
 	
 	$: maxSelectedData = Math.max(...selectedDataFilled)
 	
 	$: selectedDataFilled = getWeeklyDataOfMapFeature(showFeature)
 
 	$: selectedDataPath = selectedDataFilled.filter((d: number) => d > 0).length > 0 ? area($selectedDataFilledTweened) : ""
-	
-	
-	// $: console.log(area)
 	
 	$: selectedDataLinePath = line($selectedDataFilledTweened)
 	
@@ -367,7 +407,7 @@
 	}
 </style>
 
-<svg bind:this={svg} pointer-events="all" viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMidYMid meet" on:mousemove={handleMouseMove} on:mouseleave={unhover}>
+<svg bind:this={svg} pointer-events="all" viewBox="0 0 {width + margin.horizontalMargin} {height + margin.verticalMargin}" preserveAspectRatio="XMinYMin meet" on:mousemove={handleMouseMove} on:mouseleave={unhover}>
 	
 	<g transform="translate(0 {height + margin.verticalMargin - 20})">
 		
@@ -419,13 +459,15 @@
 					</text>
 				</g>
 			{/each}
-			<text class="axis-label horizontal"
-				dy={20}
-				dx={width / 2}
-				text-anchor="middle"
-			>
-				Weekday Distribution
-			</text>
+			<g transform="translate({width / 2} 20)">
+				<text class="axis-label horizontal "
+					text-anchor="middle"
+				>
+					Weekdays
+				</text>
+			
+			</g>
+			
 			<line 
 				class="zero-line"
 				y1={-8}

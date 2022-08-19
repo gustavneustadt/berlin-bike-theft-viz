@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+	
+</script>
+
 <script lang="ts">
 	import * as d3 from "d3"
 	import { getContext } from "svelte"
@@ -95,8 +99,8 @@
 	
 	
 	const slicePerStep = (step: number) => {
-		return step < 4 ? step : 0
-
+		const slices = step < 4 ? step : 0
+		return slices < 1 ? 1 : slices
 	}
 	
 	$: exampleDataSetRecords = exampleDataSet
@@ -344,8 +348,9 @@
 		
 		<g class="bars example">
 				
+				
 				{#each exampleDataSet as line, i}
-					{#if i === exampleDataSet.length - 1}
+					{#if i === exampleDataSet.length - 1 && step <= lastExampleStep}
 
 						<g class="example" transform="translate({x(line[0])} 0)" 
 							transition:fade={{duration: 100}}

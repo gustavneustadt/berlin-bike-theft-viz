@@ -25,7 +25,12 @@ out:fade={{duration: fadeDuration, easing: cubicInOut}}>
 		/* position: sticky; */
 		position: absolute;
 		width: 100%;
-		max-height: 100vh;
+		height: 100%;
+		padding: .5rem;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 	}
 	
 	.graph :global(.axis g .domain) {

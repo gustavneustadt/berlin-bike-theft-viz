@@ -1,3 +1,9 @@
+<script context="module" lang="ts">
+	export async function preload(page, session) {
+		return { foo: "bar" }
+	}
+</script>
+
 <script lang="ts">
 	import * as d3 from "d3"
 	import { onMount, getContext } from "svelte"
@@ -322,7 +328,7 @@ class:hovering={hover}
 			</g>
 			<AxisHelper transform="translate(0 {0})" axis={axisHorizontal} class="horizontal"/>
 			<text class="axis-label" text-anchor="middle" dx={width / 2} dy={height + 25} dominant-baseline="hanging">
-				Annual Distribution
+				Months
 			</text>
 		</g>
 		
