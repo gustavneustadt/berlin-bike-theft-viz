@@ -6,6 +6,7 @@
 	import { cubicOut, cubicInOut } from "svelte/easing";
 	import AxisHelper from '../helper/AxisHelper.svelte'
 	import SvgRect from '../helper/SvgRect.svelte'
+	import { arrayEquals } from "../helper/Functions.svelte"
 	
 	import SvgLine, { LineEnd } from '../helper/SvgLine.svelte'
 	import Annotation from '../helper/Annotation.svelte'
@@ -198,7 +199,7 @@
     let yBoundTweenedTarget = [0, 0]
 	
 	
-	$: if(!yBoundTweenedTarget.equals(yBound)) {
+	$: if(!arrayEquals(yBound, yBoundTweenedTarget)) {
 		yBoundTweened.set(yBound)
 		yBoundTweenedTarget = yBound
 	}
@@ -245,16 +246,9 @@
 	}
 	
 	const verticalAxisFormatter = (number) => {
-		const formattedParts = new Intl.NumberFormat("fr", {
-			maximumFractionDigits: 1
-		}).formatToParts(number)
-		return formattedParts.reduce((acc: string, curr: Intl.NumberFormatPart) => {
-			if(curr.type === "decimal") {
-				curr.value = "."
-			}
-			
-			return acc + curr.value
-		}, "")
+		return new Intl.NumberFormat(number < 10 ? "en" : "fr", {
+			maximumFractionDigits: number < 10 ? 1 : 0
+		}).format(number)
 	}
 	
 	$: x = d3.scaleBand()
