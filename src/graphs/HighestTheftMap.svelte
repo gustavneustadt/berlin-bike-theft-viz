@@ -54,7 +54,7 @@
 
 	
 	onMount( async () => {
-		d3.json("./public/berlinPLR.geojson").then((d: FeatureCollection): void => {
+		d3.json("./berlinPLR.geojson").then((d: FeatureCollection): void => {
 			featureData = d
 			hovering = d.features.map(_ => false)
 		})
