@@ -46,7 +46,7 @@
 	smallTitle="Total Damage"
 	subline="since {date}"
 	unit="euro"
-	comment={damageAmount > 1000000 ? "Yeah, thats Million." : null}
+	comment={damageAmount > 1000000 ? "Yeah, thats Million." : damageAmount > 1000000000 ? "Yeah, thats Billion." : ""}
 >
 	<TweenHelper 
 		value={damageAmount} 

@@ -23,6 +23,8 @@
   },
   "dependencies": {
     "@observablehq/plot": "^0.5.2",
+    "@types/d3": "^7.4.0",
+    "@types/d3-axis": "^3.0.1",
     "@types/geojson": "^7946.0.9",
     "bezier-easing": "^2.1.0",
     "colorjs.io": "^0.3.0",

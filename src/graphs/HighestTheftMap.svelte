@@ -8,7 +8,7 @@
 	// import SvgRect from './../helper/SvgRect.svelte'
 	import TweenHelper from './../helper/TweenHelper.svelte'
 
-	let svg
+	let svg: SVGGraphicsElement
 	export let data: TheftRecord[]
 	let featureData: FeatureCollection
 	let hovering: boolean[] = []
@@ -286,6 +286,7 @@
 	
 	$: selectedDataFilledTweened.set(selectedDataFilled.map((x: number) => maxSelectedData === 0 ? 0 : x / maxSelectedData) as WeeklyData)
 
+	const gradientIdentifier = Date.now() * Math.floor(Math.random() * 10)
 </script>
 
 <style>
@@ -359,11 +360,6 @@
 	svg :global(.weekday-select-background) {
 		fill: var(--colorAccentPrimary);
 	}
-	.dataline {
-		stroke: var(--colorAccentPrimaryMuted);
-		stroke-width: 1;
-		
-	}
 	.zero-line {
 		stroke: var(--colorAccentPrimaryMuted);
 		stroke-width: .5;
@@ -377,13 +373,13 @@
 		
 		{#if maxSelectedData > 0}
 		<g transform="translate(0 {-70})">
-			<linearGradient id="gradient" x1="0" x2="0" y1="1" y2="0">
+			<linearGradient id="gradient{gradientIdentifier}" x1="0" x2="0" y1="1" y2="0">
 				
 				<stop offset="0%" stop-color={colorScaleSelectedData(0)} />
 				<stop offset="100%" stop-color={colorScaleSelectedData(1)} />
 			</linearGradient>
 			
-			<linearGradient id="gradient-average" x1="0" x2="0" y1="1" y2="0">
+			<linearGradient id="gradient-average{gradientIdentifier}" x1="0" x2="0" y1="1" y2="0">
 				
 				<stop offset="20%" stop-color="white" stop-opacity="0%"/>
 				<stop offset="100%" stop-color="white" />
@@ -392,14 +388,14 @@
 				<g transform="translate({x.bandwidth() / 2} 1)">
 					{#if averageWeeklyMax > 0}
 						<g transition:fade={{duration:400, delay: 500}} >
-							<path d={averageDataLinePath} fill="url(#gradient-average)" opacity={.1} />
+							<path d={averageDataLinePath} fill="url(#gradient-average{gradientIdentifier})" opacity={.1} />
 							<path d={averageDataLine} class="dataline" fill="none" opacity={.1} />
 							
 								
 								
 							<g transform="translate({x.bandwidth() * 6.75} {y(averageWeeklyData.at(-1) / averageWeeklyMax)})">
 								<text 
-									alignment-baseline="middle" 
+									dominant-baseline="middle" 
 									class="weekday"
 									text-anchor="start"
 									opacity={.3}
@@ -410,8 +406,7 @@
 							</g>
 						</g>
 					{/if}
-					<path d={selectedDataPath} fill="url(#gradient)" opacity={.3} />
-						
+					<path d={selectedDataPath} fill="url(#gradient{gradientIdentifier})" opacity={.3} />
 					<path d={selectedDataLinePath} class="dataline" fill="none" stroke-linecap="round"/>
 				</g>
 		</g>

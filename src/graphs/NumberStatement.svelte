@@ -39,7 +39,8 @@
 		border: .4rem solid;
 		border-color: var(--colorTextDark);
 		color: var(--colorTextDark);
-		background: var(--colorTextPrimary);
+		/* background: var(--colorTextPrimary); */
+		background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, .2)) var(--colorTextPrimary);
 		border-radius: 1.5rem;
 		padding: .5rem 1.2rem;
 		box-shadow: 0 .5rem var(--colorTextDark);
