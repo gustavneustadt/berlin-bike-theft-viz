@@ -16,13 +16,29 @@
 	import TimeTheftGraph from './graphs/TimeTheftGraph.svelte'
 	import HighestTheftMap from './graphs/HighestTheftMap.svelte'
 	import AnnualDistribution from './graphs/AnnualDistribution.svelte'
+	import WeeklyTheft from './graphs/WeeklyTheft.svelte'
 
 	
 	const storySections: StorySection[] = [
 		{
-			title: "Bike Theft in Berlin",
+			title: "German Bike Theft City",
 			component: TotalSum,
 			texts: [{
+				text: `
+				According to <a href='https://de.statista.com/statistik/daten/studie/165154/umfrage/fahrraddiebstaehle-in-deutschland-2009/' target='_blank'>data</a> from the Bundeskriminalamt (Federal Criminal Police Office) Berlin had the most Bike Thefts in 2021 of all german cities with 25&thinsp;438 thefts reported. \n
+				
+				The Berlin Police provides an Online Service for citizens, called <em>Internetwache</em>. Citizens are able to report crimes, ask questions or pay their penalties. Since September 2021, the police have been testing a free access to daily updating bicycle theft data of the city; the data starts from January 2021.
+				`
+			}]
+		},
+		{
+			title: "Weekly Theft in Berlin",
+			component: TotalSumWeek,
+			texts: [{
+				text: ""
+			},
+			{	
+				subtitle: "But what is the mean",
 				text: ""
 			}]
 		},
@@ -36,13 +52,12 @@
 			]
 		},
 		{
-			title: "When do theft happen?",
+			title: "Test",
+			component: HighestDamageMonth,
 			texts: [
 				{
-					text: `Thats one of the most interesting questions to ask. Can the given dataset tell or recommend us something to prevent theft of our bikes? \n
-					Unfortunately the data set does not provide exact information about that and so the answer is hard to answer. Why? Lets have a look on my approach to estimate the time the most bikes are stolen.
-					`
-				},
+					text: "What is wrong?"
+				}
 			]
 		},
 		{
@@ -75,15 +90,6 @@
 			]
 		},
 		{
-			title: "When does bike theft happen?",
-			component: TotalSum,
-			texts: [
-				{
-					text: "I think, thats one of the most interesting questions I hope to answer. Unfortunately the data set does not provide exact information about that. All what we have is a start date and an end date. The start date might be associated with the point in time, when the bike was left in the streets, maybe in front of a store and the end date is when the theft was noticed, maybe when the bikes owner returns and can't find his bike."
-				}
-			]
-		},
-		{
 			title: "Bike Theft in Berlin",
 			component: HighestTheftMap,
 			texts: [
@@ -99,15 +105,6 @@
 			]
 		},
 		{
-			title: "Test",
-			component: HighestDamageMonth,
-			texts: [
-				{
-					text: "What is wrong?"
-				}
-			]
-		},
-		{
 			title: "How expensive are stolen bikes?",
 			component: BikeValueGraph,
 			texts: [
@@ -115,33 +112,7 @@
 					text: "This graph shows how large the damage of a theft was."
 				}
 			]
-		},
-		{
-			title: "Test",
-			component: TotalSumWeek,
-			texts: [
-				{
-					text: "What is wrong?"
-				}
-			]
-		},
-		{
-			title: "Test",
-			component: HighestDamageMonth,
-			texts: [
-				{
-					text: "What is wrong?"
-				}
-			]
-		},
-		{
-			title: "Test",
-			texts: [
-				{
-					text: "What is wrong?"
-				}
-			]
-		},
+		}
 	]
 	
 	let currentStorySectionGraphComponent: SvelteComponent
@@ -154,10 +125,6 @@
 	let currentStoryTextIndex: number
 	let currentStorySectionIndex: number
 
-	
-	// const scroller = Scrollama()
-	let progress: number
-	
 	let textElements: HTMLDivElement[][]
 	
 	$: {
