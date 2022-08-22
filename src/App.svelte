@@ -63,10 +63,8 @@ setContext("colors", {
 	}
 })
 
-const url = 'https://corsproxy.io/?' + encodeURIComponent('https://www.internetwache-polizei-berlin.de/vdb/Fahrraddiebstahl.csv');
-
 onMount(async () => {
-	await d3.csv(url).then((d: any) => { 
+	await d3.csv("data.csv").then((d: any) => { 
 		data = d.map((item: any): TheftRecord => {
 			const dateStart = getDateFrom(item.TATZEIT_ANFANG_DATUM, item.TATZEIT_ANFANG_STUNDE)
 			const dateEnd = getDateFrom(item.TATZEIT_ENDE_DATUM, item.TATZEIT_ENDE_STUNDE)

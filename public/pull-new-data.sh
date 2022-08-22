@@ -1,0 +1,1 @@
+curl "https://www.internetwache-polizei-berlin.de/vdb/Fahrraddiebstahl.csv" > ./data.csv
