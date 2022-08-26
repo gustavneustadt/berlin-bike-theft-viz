@@ -1,18 +1,15 @@
 <script lang="ts">
 import { onMount, setContext, getContext } from "svelte"
+import { fade } from "svelte/transition";
+import { cubicInOut } from "svelte/easing";
 import * as d3 from "d3"
 import Color from "colorjs.io"
 
 import Scrollama from "scrollama"
-import Texts from "./Texts.svelte"
-import GraphCollection from './GraphCollection.svelte'
-import type Scale from "d3-scale"
+
 import ContentController from './ContentController.svelte'
 
-const scroller = Scrollama()
-let currentScrollIndex: number
-let isScrollDirectionUp: boolean
-let textElements: HTMLDivElement[]
+
 
 
 let data: TheftRecord[]
@@ -123,6 +120,8 @@ h1 {
 	color: var(--colorAccentPrimaryMuted);
 	text-align: center;
 	margin: 0;
+	z-index: 300;
+	position: relative;
 }
 
 h1 > span:first-child {
@@ -261,9 +260,18 @@ author {
 	letter-spacing: .1rem;
 	opacity: .8;
 }
+.fade-in {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--colorAccentPrimary);
+	z-index: 200;
+}
 </style>
 
-{#if data != undefined}
+
 	<header>
 		<h1>
 			<span>Grand Theft</span>
@@ -274,13 +282,19 @@ author {
 		</h2>
 		<author>by Gustav Neustadt</author>
 		<div class="video-wrapper">
+			{#if !data}
+			<div class="fade-in" out:fade={{duration:300, delay: 1000, easing: cubicInOut}}>
+				
+			</div>
+			{/if}
 			<div class="background"></div>
 			<video muted autoplay playsinline loop>
 				<source src="/background_new.mp4" type="video/mp4"/>
-				<!-- <source src="/background_grey.webm" type="video/webm"/> -->
+				<source src="/background_new.webm" type="video/webm"/>
 			</video>
 		</div>
 	</header>
+{#if data != undefined}
 	<main>
 		<ContentController />
 			
