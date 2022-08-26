@@ -18,6 +18,7 @@
 		}, [0, 0]),
 		(d: TheftRecord) => d3.timeMonday(d.dateStart)
 	)
+	$: newestRecordDate = new Date(Math.max(...data.map((d: TheftRecord) => Number(d.dateStart))))
 	
 	$: rollupWeekly = d3.rollups(data,
 		(g: TheftRecord[]) => g.reduce((acc: [number, number], record: TheftRecord) => {
@@ -44,10 +45,14 @@
 
 	$: todayIsInFilteredGroupWeekRange = Date.now() > weeksRange[0] && Date.now() < weeksRange[1]
 	
-	$: currentWeekDate = new Intl.DateTimeFormat("en", {
+	$: currentWeekNewestDate = new Intl.DateTimeFormat("en", {
 		weekday: "long",
 		day: "numeric",
 		month: "long"
+	}).format(newestRecordDate)
+	
+	$: currentWeekDate = new Intl.DateTimeFormat("en", {
+		weekday: "long",
 	}).format(weeksRange[0])
 	
 	$: damageAmount = filteredGroup[1][0]
@@ -96,7 +101,7 @@
 			<NumberStatement
 			secondary
  			smallTitle="{todayIsInFilteredGroupWeekRange ? "Current Week": "Last Week"} Damage"
- 			subline="from {currentWeekDate}"
+ 			subline="from {currentWeekDate} until {currentWeekNewestDate}"
  			unit="euro"
 			>
 				<TweenHelper value={damageAmount} tweenOptions={{duration: 500, easing: cubicOut}} startValue={damageAmount * .8} 
