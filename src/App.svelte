@@ -18,7 +18,6 @@ let textElements: HTMLDivElement[]
 let data: TheftRecord[]
 
 $: setContext("theftData", data)
-$: console.log(data)
 
 setContext("colors", {
 	getColors: (element: Element) => {
@@ -101,7 +100,6 @@ function getDateFrom(date: string, hour: string): Date {
 	return parsedDate
 }
 
-let progress: number = 0
 
 let videoElement
 
@@ -289,6 +287,14 @@ author {
 			<p>
 				This data visualisation project is one of 6 pojects resulted from a course I took at the University of Applied Sciences in Potsdam (FHP) by Lucas Vogel: <em>Citizen Science — Stadtdaten visualisieren</em>.
 			</p>
+			<p>
+				August 2022
+			</p>
+			<div class="source">
+				<div class="desc">Source Code</div>
+				<a class="link" href="https://github.com/gustavneustadt/berlin-bike-theft-viz" target="_blank">GitHub</a>
+			</div>
+			
 			<div class="source">
 				<div class="desc">concept, design & development</div>
 				<div class="title">Gustav Neustadt</div>

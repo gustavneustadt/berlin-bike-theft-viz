@@ -26,3 +26,5 @@ dist-ssr
 *.woff
 *.woff2
 /public/videos.txt
+/.nova/Tasks
+/.nova/Publishing
