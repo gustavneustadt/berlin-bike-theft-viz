@@ -28,7 +28,7 @@
 				text: `
 				According to <a href='https://de.statista.com/statistik/daten/studie/570624/umfrage/fahrraddiebstaehle-und-aufgeklaerte-faelle-in-deutschen-staedten/' target='_blank'>data</a> from the Bundeskriminalamt (Federal Criminal Police Office) Berlin had the most Bike Thefts in 2021 of all german cities with 25&thinsp;438 thefts reported. But Leipzig had reported the most <a href="https://de.statista.com/statistik/daten/studie/165154/umfrage/fahrraddiebstaehle-in-deutschland-2009/">Bike Thefts relative to the population</a>; Berlin only takes the 16th place in this regard.\n
 				
-				The Berlin Police provides an Online Service for citizens, called <em>Internetwache</em>. Citizens are able to report crimes, ask questions or pay their penalties. Since September 2021, the police have been testing a free access to daily updating bicycle theft data of the city; the data starts from January 2021. \n
+				The Berlin Police provides an Online Service for citizens: the <em>Internetwache</em>. Citizens are able to report crimes, ask questions or pay their penalties. Since September 2021, the police have been testing a free and open access to daily updating bicycle theft data of the city, starting from January 2021. \n
 				
 				This Visualisation Project uses this data provided by the Berlin Police Department and shows you some insights into it. The police publishes new data every day at 12:00 am.
 				`
@@ -41,7 +41,7 @@
 			{	
 				text: `The Berlin Police solved 4.6 % of 25&thinsp;438 reported bike theft cases in 2021 (<a href="https://www.berlin.de/polizei/_assets/verschiedenes/pks/pks-kurzbericht-2021.pdf" target="_blank">Latest Crime Report</a>, Page 23). That means only 18 out of 400 theft cases get solved.\n
 				
-				This data shows you the mean damage per week in terms of money and amount of thefts in berlin at the top and the data of the current week. Because new data gets published every day at 12 am, the grap may show the data from last week.\n
+				This data shows you the mean damage per week in terms of money and amount of thefts in berlin at the top and the data of the current week at the bottom. Because new data gets published every day at 12 am, the graph may show you the data from last week.\n
 				`
 			}]
 		},
@@ -198,6 +198,7 @@
 @media (max-width: 66.25rem) {
 	.graphs-wrapper {
 		border-top: .5px solid var(--colorTextMuted);
+		overflow: auto;
 	}
 	
 	.content-wrapper {
