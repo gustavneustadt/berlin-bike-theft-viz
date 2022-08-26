@@ -1,1 +1,1 @@
-curl "https://www.internetwache-polizei-berlin.de/vdb/Fahrraddiebstahl.csv" > ./data.csv
+curl "https://www.internetwache-polizei-berlin.de/vdb/Fahrraddiebstahl.csv" > /var/www/virtual/gustav/biketheft.gustav.uber.space/data.csv
