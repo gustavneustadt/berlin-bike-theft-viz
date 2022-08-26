@@ -109,7 +109,7 @@
 				{
 					text: `The map shows you where to not leave your bike unattended. Doesn't it?\n
 					
-					I found no dataset about the population and traffic density for each district, so it is hard to tell which district is a bike thieves paradise.\n
+					I found no dataset about the population and traffic density for each district, so it is hard to tell which district is a bike thief's paradise.\n
 					
 					The additional diagram at the bottom gives you the individual theft fingerprint of the selected berlin city district.\n
 					`

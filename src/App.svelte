@@ -208,6 +208,12 @@ author {
 	box-sizing: border-box;
 }
 
+@media (max-width: 66.25rem) {
+	.credits {
+		margin: 50vh 0 0;
+	}
+}
+
 .credits .text-wrapper {
 	width: 32rem;
 	max-width: calc(100vw - 2rem);
