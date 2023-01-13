@@ -5,7 +5,7 @@ import { cubicInOut } from "svelte/easing";
 import * as d3 from "d3"
 import Color from "colorjs.io"
 
-import Scrollama from "scrollama"
+// import Scrollama from "scrollama"
 
 import ContentController from './ContentController.svelte'
 
@@ -60,34 +60,54 @@ setContext("colors", {
 })
 
 onMount(async () => {
-	await d3.csv("data.csv").then((d: any) => { 
-		data = d.map((item: any): TheftRecord => {
-			const dateStart = getDateFrom(item.TATZEIT_ANFANG_DATUM, item.TATZEIT_ANFANG_STUNDE)
-			const dateEnd = getDateFrom(item.TATZEIT_ENDE_DATUM, item.TATZEIT_ENDE_STUNDE)
-			
-			const dateRange: TheftRecordProbItem[] = [...d3.timeHour.every(1).range(dateStart, dateEnd), dateEnd].map(
-				(d: Date, _, arr: Date[]) => {
-					return {
-						date: d,
-						probScore: 1 / arr.length
-					}
+	const minYear = 2021
+	const currentDate = new Date()
+	const currentYear = currentDate.getFullYear()
+	
+	let parseTheftRecordFromData = (item: any): TheftRecord => {
+		const dateStart = getDateFrom(item.TATZEIT_ANFANG_DATUM, item.TATZEIT_ANFANG_STUNDE)
+		const dateEnd = getDateFrom(item.TATZEIT_ENDE_DATUM, item.TATZEIT_ENDE_STUNDE)
+		
+		const dateRange: TheftRecordProbItem[] = [...d3.timeHour.every(1).range(dateStart, dateEnd), dateEnd].map(
+			(d: Date, _, arr: Date[]) => {
+				return {
+					date: d,
+					probScore: 1 / arr.length
 				}
-			)
-			
-			return {
-				lor: Number(item.LOR),
-				bikeType: item.ART_DES_FAHRRADS,
-				dateStart: dateStart,
-				dateEnd: dateEnd,
-				dateDurationHours: dateRange.length,
-				burglary: item.DELIKT == "Keller- und Bodeneinbruch",
-				damageAmount: Number(item.SCHADENSHOEHE),
-				attemptedTheft: item.VERSUCH !== "Nein",
-				dateRange: dateRange
 			}
-
+		)
+		
+		return {
+			lor: Number(item.LOR),
+			bikeType: item.ART_DES_FAHRRADS,
+			dateStart: dateStart,
+			dateEnd: dateEnd,
+			dateDurationHours: dateRange.length,
+			burglary: item.DELIKT == "Keller- und Bodeneinbruch",
+			damageAmount: Number(item.SCHADENSHOEHE),
+			attemptedTheft: item.VERSUCH !== "Nein",
+			dateRange: dateRange
+		}
+	}
+	
+	let dataArray: TheftRecord[] = []
+	
+	for (let i = minYear; i < currentYear; i++) {
+		await d3.csv(`data-${i}.csv`).then((d: any) => { 
+			const yearData = d.map(parseTheftRecordFromData).filter((d: TheftRecord) => {
+				return d.dateEnd.getFullYear() == i - 1
+			})
+			dataArray.push(...yearData) 
 		})
+	}
+	
+	await d3.csv("data.csv").then((d: any) => { 
+		const currentData = d.map(parseTheftRecordFromData)
+		dataArray.push(...currentData)
 	})
+	
+	data = dataArray
+	
 })
 
 function getDateFrom(date: string, hour: string): Date {
@@ -305,10 +325,13 @@ author {
 				Credits
 			</h3>
 			<p>
+				August 2022
+			</p>
+			<p>
 				This data visualisation project is one of 6 pojects resulted from a course I took at the University of Applied Sciences in Potsdam (FHP) by Lucas Vogel: <em>Citizen Science — Stadtdaten visualisieren</em>.
 			</p>
 			<p>
-				August 2022
+				Last Update: January 13th 2023
 			</p>
 			<div class="source">
 				<div class="desc">Source Code</div>
