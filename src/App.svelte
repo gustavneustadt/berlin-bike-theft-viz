@@ -97,11 +97,13 @@ onMount(async () => {
 			const yearData = d.map(parseTheftRecordFromData).filter((d: TheftRecord) => {
 				return d.dateEnd.getFullYear() == i - 1
 			})
+			
+		
 			dataArray.push(...yearData) 
 		})
 	}
 	
-	await d3.csv("data.csv").then((d: any) => { 
+	await d3.csv(`data-${currentYear}.csv`).then((d: any) => { 
 		const currentData = d.map(parseTheftRecordFromData)
 		dataArray.push(...currentData)
 	})

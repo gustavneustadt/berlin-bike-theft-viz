@@ -244,7 +244,7 @@
 	])
 	
 	const percentageFormatter = new Intl.NumberFormat("en", {
-		maximumFractionDigits: 1,
+		maximumFractionDigits: 2,
 	})
 	
 	$: percentageDifference = hoverCircleY.current ? (hoverCircleY.current / hoverCircleY.median - 1) * 100 : 0
@@ -432,22 +432,22 @@ class:hovering={hover}
 					</g>
 				
 			{/if}
-			{#if Math.abs(percentageDifference) > 0}
 				<g 
 					class="percentage-hover"
 					transform="translate({x($hoverLineXPosTweened)-10} 0)"
 					transition:fade={{duration: 100}}
 				>
+				{#if Math.abs(percentageDifference) > 0.2}
 					<SvgLine 
 						x1={0} 
-						y1={y($hoverCircleYTweened.at(0))} 
-						y2={y($hoverCircleYTweened.at(1))} 
+						y1={y(Math.min($hoverCircleYTweened.at(0), $hoverCircleYTweened.at(1)))} 
+						y2={y(Math.max($hoverCircleYTweened.at(0), $hoverCircleYTweened.at(1)))} 
 						strokeWidth={.5}
 						lineEndHeight={10}
 						end={LineEnd.LineOneSide}
 						start={LineEnd.LineOneSide}
 					/>
-					
+				{/if}	
 					
 					<text 
 						class="percentage-text"
@@ -456,14 +456,14 @@ class:hovering={hover}
 						text-anchor="end"
 						dominant-baseline="middle"
 					>
-						{percentageDifference > 0 ? "+" : ""} <TweenHelper 
+						{percentageDifference > 0 ? "+" : percentageDifference < 0 ? "–" : ""} <TweenHelper 
 							tweenOptions={{duration:200}}
-							value={percentageDifference} 
+							value={Math.abs(percentageDifference)} 
 							formatter={percentageFormatter}
 						/> %
 					</text>
 				</g>
-			{/if}
+			
 		{:else}
 			<text 
 				dy={height / 3 * 2}
