@@ -50,8 +50,8 @@
 			component: AnnualDistribution,
 			texts: [
 				{
-					subtitle: "Is there a bike season?",
-					text: `The data shows that in the summer months more bikes get stolen; but thats obvious anyways I think. In my perspective most people use their bikes in summer months to commute to work or for other mid to long range  distances.\n
+					subtitle: "Is there a bike theft season?",
+					text: `The data shows that in the summer months more bikes get stolen; but thats obvious anyways I think. In my perspective most people use their bikes in summer months to commute to work or for other mid to long range distances.\n
 					
 					You can hover with your mouse or click on the graph to get information about the current year monthly thefts relative to the monthly mean.`
 				}
