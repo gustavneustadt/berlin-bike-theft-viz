@@ -291,6 +291,13 @@ author {
 	background: var(--colorAccentPrimary);
 	z-index: 200;
 }
+.last-modified {
+	font-variant-numeric: tabular-nums;
+	font-variant-caps: all-small-caps;
+	letter-spacing: .05em;
+	color: var(--colorTextMuted);
+	display: block;
+}
 </style>
 
 
@@ -304,13 +311,14 @@ author {
 		</h2>
 		<author>by Gustav Neustadt</author>
 		<div class="video-wrapper">
-			{#if !data}
+			<!-- {#if !data}
 			<div class="fade-in" out:fade={{duration:300, delay: 1000, easing: cubicInOut}}>
 				
 			</div>
-			{/if}
+			{/if} -->
 			<div class="background"></div>
-			<video muted autoplay playsinline loop>
+			<video muted autoplay playsinline loop
+				poster="/background.png">
 				<source src="/background_new.mp4" type="video/mp4"/>
 				<source src="/background.webm" type="video/webm"/>
 			</video>
@@ -328,12 +336,12 @@ author {
 			</h3>
 			<p>
 				August 2022
+				<span class="last-modified">
+					Last Update: 2023-1-14
+				</span>
 			</p>
 			<p>
 				This data visualisation project is one of 6 pojects resulted from a course I took at the University of Applied Sciences in Potsdam (FHP) by Lucas Vogel: <em>Citizen Science — Stadtdaten visualisieren</em>.
-			</p>
-			<p>
-				Last Update: January 13th 2023
 			</p>
 			<div class="source">
 				<div class="desc">Source Code</div>
