@@ -18,7 +18,8 @@
 		}, [0, 0]),
 		(d: TheftRecord) => d3.timeMonday(d.dateStart)
 	)
-	$: newestRecordDate = new Date(Math.max(...data.map((d: TheftRecord) => Number(d.dateStart))))
+
+	$: newestRecordDate = new Date(d3.max(data, (d: TheftRecord) => Number(d.dateStart)))
 	
 	$: rollupWeekly = d3.rollups(data,
 		(g: TheftRecord[]) => g.reduce((acc: [number, number], record: TheftRecord) => {

@@ -144,7 +144,7 @@
 	$: showFeatureIndex = hoveredFeatureIndex ?? selectedFeatureIndex
 	
 	
-	$: console.log(maxItem, featureData?.features)
+	// $: console.log(maxItem, featureData?.features)
 	
 	$: relevantDataShowFeature = parseRelevantInformationFromFeature(showFeature)
 	
