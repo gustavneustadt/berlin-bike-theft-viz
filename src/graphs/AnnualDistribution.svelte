@@ -86,7 +86,7 @@
 		return medianPerMonthCalculated
 	}
 	
-	const currentDate = new Date()
+	const currentDate: Date = new Date()
 	
 	const datesAreSameMonth = (a: Date, b: Date): boolean => {
 		return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()

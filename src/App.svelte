@@ -119,7 +119,6 @@ function getDateFrom(date: string, hour: string): Date {
 	return parsedDate
 }
 
-
 let videoElement
 
 $: if(videoElement) { videoElement.play() }
